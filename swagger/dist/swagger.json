@@ -1,0 +1,212 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "IRONMAN (DhandaHub Backend)",
+        "description": "API Docs for DhandaHub Backend",
+        "version": "1.0.0",
+        "contact": {
+            "name": "gurbaj@dhandahub.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/admin/login" : {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Login api for admin",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "platform",
+                        "description": "In Headers: [android, ios, web]",
+                        "required": true,
+                        "type": "string",
+                        "default": "ios"
+                    },
+                    {
+                        "in": "header",
+                        "name": "version",
+                        "description": "In Headers",
+                        "required": true,
+                        "type": "string",
+                        "default": "1.0.0"
+                    },
+                    {
+                        "in": "body",
+                        "name": "Request Body",
+                        "description": "",
+                        "type": "object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/adminLogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/adminLoginResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin": {
+            "post": {
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Craete admin api",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "In Headers: jwt bearer token",
+                        "required": true,
+                        "type": "string",
+                        "default": "Bearer "
+                    },
+                    {
+                        "in": "formData",
+                        "name": "name",
+                        "description": "Name of the Admin",
+                        "type": "string",
+                        "required": true,
+                        "default": "Gurbaj Singh"
+                        
+                    },
+                    {
+                        "in": "formData",
+                        "name": "email",
+                        "description": "email ID",
+                        "type": "string",
+                        "required": true,
+                        "default": "gurbaj@gmail.com"
+                        
+                    },
+                    {
+                        "in": "formData",
+                        "name": "password",
+                        "description": "password",
+                        "type": "password",
+                        "required": true,
+                        "default": "sdfghf"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/createAdminResponseSucess"
+                        }
+                    },
+                    "401": {
+                        "description": "Token Expired"
+                    },
+                    "500": {
+                        "description": "Admin already exists",
+                        "type": "object",
+                        "schema": {
+                            "$ref": "#/definitions/createAdminResponseFailed"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "adminLogin": {
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "default": "gurbaj@gmail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "default": "password"
+                }
+            }
+        },
+        "adminLoginResponse": {
+            "properties": {
+                "_id": {
+                    "type": "string",
+                    "default": "5c8e8d2fcd54385a456d173b"
+                },
+                "name": {
+                    "type": "string",
+                    "default": "Gurbaj Singh"
+                },
+                "email": {
+                    "type": "string",
+                    "default": "gurbaj@dhandahub.com"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "example": ["user", "admin"]
+                },
+                "accessToken": {
+                    "type": "string",
+                    "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzhlOGQyZmNkNTQzODVhNDU2ZDE3M2IiLCJyb2xlcyI6WyJ1c2VyIiwiYWRtaW4iXSwiaXNzdWVyIjoiZGhhbmRhSHViLmNvbSIsImlhdCI6MTU1Mjg0ODU4NCwiZXhwIjoxNTUyOTM0OTg0fQ.oM6VrPF-XBaVbBhfqLQ2ZcHrnmlcYqcffoR5axIUdvE"
+                }
+            }
+        },
+        "createAdminResponseSucess": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "createAdminResponseFailed": {
+            "properties": {
+                "error": {
+                    "type": "object",
+                    "$ref": "#/definitions/errorBody",
+                    "example": {
+                        "error": "Conflict",
+                        "message": "Admin already exists",
+                        "statusCode": 409,
+                        "errCode": "1002"
+                      }
+                }
+            }
+        },
+        "errorBody": {
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "default": "Internal Server Error"
+                },
+                "message": {
+                    "type": "string",
+                    "default": "An internal server error occured"
+                },
+                "statusCode": {
+                    "type": "integer",
+                    "default": 500
+                },
+                "errCode": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
