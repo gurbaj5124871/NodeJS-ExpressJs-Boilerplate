@@ -46,14 +46,20 @@
                         "default": "1.0.0"
                     },
                     {
-                        "in": "body",
-                        "name": "Request Body",
-                        "description": "",
-                        "type": "object",
+                        "in": "formData",
+                        "name": "email",
+                        "description": "Email ID",
+                        "type": "string",
                         "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/adminLogin"
-                        }
+                        "default": "gurbaj@dhandahub.com"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "password",
+                        "description": "Password",
+                        "type": "string",
+                        "required": true,
+                        "default": "password@1"
                     }
                 ],
                 "responses": {

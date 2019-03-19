@@ -9,6 +9,6 @@ const express       = require('express'),
 
 router.post('/login', validator.login, controller.login)
 
-router.post('/', authentication.verifyToken, validator.createAdmin, controller.createAdmin)
+router.post('/', authentication.verifyToken, accessAllowed('create', resource.admin), validator.createAdmin, controller.createAdmin)
 
 module.exports      = router

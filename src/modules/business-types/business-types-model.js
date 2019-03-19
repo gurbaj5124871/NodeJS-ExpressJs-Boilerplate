@@ -5,7 +5,7 @@ const businessTypesSchema   = mongoose.Schema({
     name                    : {type: String, required: true},
     businessTerm            : String,
     customerTerm            : String,
-
+    order                   : Number,
     isVerified              : {type: Boolean, default: false, index: true}
 }, {timestamps: true})
 

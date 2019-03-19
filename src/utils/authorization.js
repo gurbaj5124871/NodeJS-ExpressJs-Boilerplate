@@ -11,6 +11,7 @@ accessControl
     .readAny(resource.user, ['*']) // update these accordingly
     .readOwn(resource.user, ['*', '!tracking']) // update these accordingly
     .updateOwn(resource.user)
+    .readAny(resource.businessTypes)
 
 // Customer Specific
 accessControl
@@ -21,12 +22,15 @@ accessControl
 accessControl
     .grant(role.serviceProvider)
     .extend(role.user)
-
+    .create(resource.businessTypes)
 
 // Admin Specific
 accessControl
     .grant(role.admin)
     .extend(role.user)
+    .create(resource.admin)
+    .create(resource.businessTypes)
+    .updateAny(resource.businessTypes)
 
 const accessAllowed = (actionName, resource) => {
     return (req, res, next) => {

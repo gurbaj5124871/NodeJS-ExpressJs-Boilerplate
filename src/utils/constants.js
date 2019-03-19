@@ -6,8 +6,10 @@ module.exports = Object.freeze({
         admin           : 'admin'
     },
     resource: {
+        admin           : 'admin',
         user            : 'user',
         allUser         : 'allUser',
+        businessTypes   : 'businessModelTypes'
     },
 
     businessModelTypes: {

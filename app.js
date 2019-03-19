@@ -55,7 +55,7 @@ app.use(errify.errorhandlerMiddleware);
 // Bootstraping
 (async () => {
     await require('./bootstrap/mongo')()
-    await require('./bootstrap/redis')()
+    await require('./bootstrap/redis')
 })();
 
 process.on('uncaughtException', err => {

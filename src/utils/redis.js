@@ -1,11 +1,11 @@
-// Internal hash keys
+const redis                 = require('../../bootstrap/redis').redisClient;
 
-module.exports = exports = {
-    userUnreadNotificationCount: 'unreadNotificationCount',
-};
+const redisKeys             = Object.freeze({
+    // sorted set storing verified business types
+    businessTypes           : `businessTypes:`
+})
 
-// map of all important user stats like - projects count, followers count etc
-// Expiring after 30 days only after Total project claps are formed
-exports.getUserStatsMapKey = function (userId) {
-    return 'user:stats:' + userId;
-};
+module.exports              = {
+    redis,
+    redisKeys
+}

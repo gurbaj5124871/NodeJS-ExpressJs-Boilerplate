@@ -24,9 +24,12 @@ const findOneAndUpdate = async (model, criteria, updation, options) => {
     return model.findOneAndUpdateAsync(criteria, updation, options)
 }
 
-const update = async (model, criteria, updation, options = {}) => {
-    options.multi = true
-    return model.updateAsync(criteria, updation, options)
+const updateOne = async (model, criteria, updation, options = {}) => {
+    return model.updateOneAsync(criteria, updation, options)
+}
+
+const updateMany = async (model, criteria, updation, options = {}) => {
+    return model.updateManyAsync(criteria, updation, options)
 }
 
 const findOneAndRemove = async (model, criteria) => {
@@ -68,7 +71,8 @@ module.exports = {
     findOne,
     count,
     findOneAndUpdate,
-    update,
+    updateOne,
+    updateMany,
     findOneAndRemove,
     deleteMany,
     aggregate,
