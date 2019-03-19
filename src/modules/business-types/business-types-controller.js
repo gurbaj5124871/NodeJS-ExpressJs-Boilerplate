@@ -40,6 +40,15 @@ const getBusinessTypes          = async (req, res, next) => {
 
 const updateBusinessType        = async (req, res, next) => {
     try {
+        const businessTypeId    = req.params._id, body = req.body;
+        if(body.order)
+            await businessTypesServices.getOrderForBusinessType(body.order)
+        const businessType      = await mongo.findOneAndUpdate(BusinessTypes, {_id: businessTypeId}, body, {lean: true, lean: true}) // dont pass new true as arg
+        if(businessType && businessType.isVerified) {
+            const update = await businessTypesServices.removeBusinessTypeFromCache(businessType.order)
+            if(update === 1)
+            await businessTypesServices.addBusinessTypeToCache(businessType, businessType.order)
+        }
         return res.send({success: true})
     } catch (err) {
         next(err)

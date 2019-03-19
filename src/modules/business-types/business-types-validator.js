@@ -7,7 +7,8 @@ const createBusinessType    = celebrate({
         name                : Joi.string().required().max(50),
         businessTerm        : Joi.string().required().max(50),
         customerTerm        : Joi.string().required().max(50),
-        order               : Joi.number().integer().min(1)
+        order               : Joi.number().integer().min(1),
+        imageUrl            : Joi.string()
     })
 })
 
@@ -26,7 +27,10 @@ const updateBusinessType    = celebrate({
     body                    : Joi.object().keys({
         name                : Joi.string().max(50),
         businessTerm        : Joi.string().max(50),
-        customerTerm        : Joi.string().max(50)
+        customerTerm        : Joi.string().max(50),
+        isVerified          : Joi.boolean().valid(true),
+        order               : Joi.number().integer().min(1),
+        imageUrl            : Joi.string()
     }).or('name', 'businessTerm', 'customerTerm')
 })
 

@@ -8,7 +8,7 @@ const mongo                     = require('../../utils/mongo'),
 const getOrderForBusinessType   = async (order = undefined) => {
     const criteria              = {isVerified: true}
     if(order)                   {
-        const update            = await mongo.updateOne(BusinessTypes, Object.assign(updateMany, {order: {$gte: order}}), {$inc: {order: 1}})
+        const update            = await mongo.updateMany(BusinessTypes, Object.assign(criteria, {order: {$gte: order}}), {$inc: {order: 1}})
         if(update.nModified > 0)
             await redis.delAsync(redisKeys.businessTypes)    
     } else {
@@ -76,11 +76,21 @@ const paginateBusinessTypes     = (businessTypes, limit) => {
     return {businessTypes, next}
 }
 
+const addBusinessTypeToCache    = async (businessType, order) => {
+    const key                   = redisKeys.businessTypes
+    if(await redis.existsAsync(key) !== 0)
+    redis.zaddAsync(key, order, JSON.stringify(businessType))
+}
+
+const removeBusinessTypeFromCache= order => redis.zremrangebyscore(redisKeys.businessTypes, order, order)
+
 module.exports                  = {
     getOrderForBusinessType,
     createBusinessType,
     getBusinessTypesCache,
     getBusinessTypes,
     getBusinessTypesCount,
-    paginateBusinessTypes
+    paginateBusinessTypes,
+    addBusinessTypeToCache,
+    removeBusinessTypeFromCache
 }
