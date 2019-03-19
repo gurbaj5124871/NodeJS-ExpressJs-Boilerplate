@@ -29,7 +29,58 @@ const createBusinessType        = async businessType => {
     return businessType.toJSON()
 }
 
+const getBusinessTypesCache     = async (limit = 10, order = '-inf') => {
+    const key                   = redisKeys.businessTypes
+    if (await redis.exists(key) === 0) {
+        const businessTypes     = await getBusinessTypes()
+        if(businessTypes.length === 0)
+            return []
+        await redis.zaddAsync(key, businessTypes.reduce((arr, buss) => {
+            arr.push(buss.order, JSON.stringify(buss))
+            return arr
+        }, []))
+    }
+    const startRange            = '(' + order
+    const businessTypes         = await redis.zrangebyscoreAsync(key, startRange, '+inf', 'limit', 0, limit +1)
+    return businessTypes.map(JSON.parse)
+}
+
+const getBusinessTypes          = (includeUnverified = false, limit = undefined, order) => {
+    const criteria              = {isVerified: true}, options = {lean: true};
+    if(order)
+        criteria['order']       = {$gt: order}
+    if(includeUnverified)
+        delete criteria.isVerified
+    if(limit)
+        options['limit']        = limit + 1
+    return mongo.find(BusinessTypes, criteria, {__v: 0}, options)
+}
+
+const getBusinessTypesCount     = async (includeUnverified = false) => {
+    if(includeUnverified)
+        return BusinessTypes.countDocuments()
+    else {
+        let count               = await redis.zcardAsync(redisKeys.businessTypes)
+        if(!count)
+        count                   = BusinessTypes.countDocuments({isVerified: true})
+        return count
+    }
+}
+
+const paginateBusinessTypes     = (businessTypes, limit) => {
+    let next                    = false
+    if(businessTypes.length > limit) {
+        businessTypes.pop()
+        next                    = `?limit=${limit}&order=${businessTypes[businessTypes.length -1].order}`
+    }
+    return {businessTypes, next}
+}
+
 module.exports                  = {
     getOrderForBusinessType,
-    createBusinessType
+    createBusinessType,
+    getBusinessTypesCache,
+    getBusinessTypes,
+    getBusinessTypesCount,
+    paginateBusinessTypes
 }

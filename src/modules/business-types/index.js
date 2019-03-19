@@ -13,6 +13,6 @@ router.get('/', authentication.verifyToken, validator.getBusinessTypes, controll
 
 router.patch('/:_id', authentication.verifyToken, accessAllowed('updateAny', resource.businessTypes), validator.updateBusinessType, controller.updateBusinessType)
 
-//router.get('/:_id', authentication.verifyToken, validator.getBusinessTypeById, controller.getBusinessTypeById)
+router.get('/:_id', authentication.verifyToken, validator.getBusinessTypeById, controller.getBusinessTypeById)
 
 module.exports      = router

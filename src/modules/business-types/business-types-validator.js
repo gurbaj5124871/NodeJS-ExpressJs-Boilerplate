@@ -14,7 +14,8 @@ const createBusinessType    = celebrate({
 const getBusinessTypes      = celebrate({
     query                   : Joi.object().keys({
         limit               : Joi.number().integer().default(10),
-        lastId              : Joi.string().regex(mongoIdRegex)
+        order               : Joi.number().integer(),
+        includeUnverified   : Joi.boolean().default(false)
     })
 })
 
