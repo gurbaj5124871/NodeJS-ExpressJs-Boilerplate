@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 // CRUD Services for mongodb
 
 const createOne = async (model, doc) => {
@@ -64,6 +66,8 @@ const insertManyWithPopulate = async (model, arrayToSave, populateOptions) => {
     })
 }
 
+const getObjectId = () => mongoose.Types.ObjectId()
+
 module.exports = {
     createOne,
     insertMany,
@@ -79,5 +83,6 @@ module.exports = {
     bulkWrite,
     findStream,
     aggregateStream,
-    insertManyWithPopulate
+    insertManyWithPopulate,
+    getObjectId
 }

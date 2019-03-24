@@ -1,43 +1,48 @@
 const bluebird          = require('bluebird'), 
     jwt                 = bluebird.promisifyAll(require('jsonwebtoken')),
+    sessions            = require('./sessions'),
     config              = require('../../app-config'),
-    constants           = require('./constants'),
     errify              = require('./errify');
 
 const secret            = config.get('/jwt/secret')
 
 const verifyToken       = async (req, res, next) => {
-    const token         = req.headers.authorization
-    try {
-        if (token && token.split(' ').length > 0 && token.split(' ')[0].toLowerCase() === 'bearer') {
-            const decoded   = await jwt.verifyAsync(token.split(' ')[1], secret)
-            req.user        = decoded
-            next()
+    let token           = req.headers.authorization;
+    if(token)           {
+        try             {
+            token       = token.split(' ')
+            if(token.length !== 2 && token[0].toLowerCase() !== 'bearer')
+                throw errify.unauthorized('Token Expired', '1052')
+            else token  = token[1]
+            try         {
+                const decode    = await jwt.verifyAsync(token, secret)
+                const session   = (await sessions.getSessionFromToken(decode))[0]
+                if(!session)
+                    throw errify.unauthorized('Token Expired', '1052')
+                req.user= Object.assign(decode, JSON.parse(session))
+                next()
+            } catch(err){
+                try {await sessions.expireSessionFromToken(jwt.decode(token, {json: true, complete: true}))} catch(err) {}
+                throw errify.unauthorized('Token Expired', '1052')
+            }
+        } catch (err)   {
+            next(err)
         }
-        else throw new Error()
-    } catch (err) {
-        next(errify.unauthorized('Token Expired', '1052'))
-    }
+    } else next(errify.unauthorized('Token Expired', '1052'))
 }
 
 const verifyTokenIfExists   = async (req, res, next) => {
-    const token             = req.headers.authorization
-    if (token && token.split(' ').length > 0 && token.split(' ')[0].toLowerCase() === 'bearer') {
-        try {
-            const decoded   = await jwt.verifyAsync(token.split(' ')[1])
-            req.user        = decoded
-            next()
-        } catch (err) {
-            next(errify.unauthorized('Token Expired', '1052'))
-        }
-    }
+    if(req.headers.authorization)
+        return verifyToken(req, res, next)
     else next()
 }
 
-const generateToken         = async (userId, roles, platform) => {
-    const role              = roles.includes(constants.roles.admin) ? constants.roles.admin : constants.roles.user;
+const generateToken         = async (userId, sessionId, role, roles, platform) => {
     const expiry            = config.get(`/jwt/expireAfter/${role}/${platform}`) || '1d';
-    return jwt.signAsync({userId, roles, issuer: 'dhandaHub.com'}, secret, {expiresIn: expiry})
+    return jwt.signAsync({
+        userId: userId.toString(), sessionId: sessionId.toString(),
+        role, roles, issuer: 'dhandahub.com'}, secret, {expiresIn: expiry
+    })
 }
 
 module.exports      = {

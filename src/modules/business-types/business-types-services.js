@@ -1,8 +1,5 @@
 const mongo                     = require('../../utils/mongo'),
     {redis, redisKeys}          = require('../../utils/redis'),
-    constants                   = require('../../utils/constants'),
-    errify                      = require('../../utils/errify'),
-    errMsg                      = require('../../utils/error-messages'),
     BusinessTypes               = require('./business-types-model');
 
 const getOrderForBusinessType   = async (order = undefined) => {
@@ -84,6 +81,8 @@ const addBusinessTypeToCache    = async (businessType, order) => {
 
 const removeBusinessTypeFromCache= order => redis.zremrangebyscore(redisKeys.businessTypes, order, order)
 
+const getBusinessTypeById       = _id => BusinessTypes.findById(_id, {__v: 0}).lean()
+
 module.exports                  = {
     getOrderForBusinessType,
     createBusinessType,
@@ -92,5 +91,6 @@ module.exports                  = {
     getBusinessTypesCount,
     paginateBusinessTypes,
     addBusinessTypeToCache,
-    removeBusinessTypeFromCache
+    removeBusinessTypeFromCache,
+    getBusinessTypeById
 }

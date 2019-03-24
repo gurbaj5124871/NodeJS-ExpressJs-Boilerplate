@@ -24,13 +24,20 @@ const config            = {
             $default    : "development_secret"
         },
         expireAfter     : {
-            user        : {
-                android : '30d',
-                ios     : '30d',
-                web     : '7d'
-            },
             admin       : {
                 web     : '1d'
+            },
+            serviceProvider: {
+                android : '30d',
+                ios     : '30d',
+                web     : '7d',
+                mobileWeb: '1d'
+            },
+            customer    : {
+                android : '30d',
+                ios     : '30d',
+                web     : '1d',
+                mobileWeb: '1d'
             }
         }
     },

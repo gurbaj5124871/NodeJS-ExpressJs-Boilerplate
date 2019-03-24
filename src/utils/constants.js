@@ -1,17 +1,34 @@
 module.exports = Object.freeze({
-    roles: {
-        user            : 'user',
+    userRoles: {
         customer        : 'cutomer',
         serviceProvider : 'serviceProvider',
         admin           : 'admin'
     },
+    accessRoles: {
+        admin: {
+            admin       : 'admin',
+            superAdmin  : 'superAdmin'
+        },
+        customer: {
+            customer    : 'customer',
+            influencer  : 'influencer'
+        },
+        serviceProvider : {
+            serviceProvider: 'serviceProvider'
+        }
+    },
+    platforms: {
+        android         : 'android',
+        ios             : 'ios',
+        web             : 'web',
+        mobileWeb       : 'mobileWeb'
+    },
     resource: {
         admin           : 'admin',
-        user            : 'user',
-        allUser         : 'allUser',
+        customer        : 'customer',
+        serviceProvider : 'serviceProvider',
         businessTypes   : 'businessModelTypes'
     },
-
     businessModelTypes: {
         b2c: 1,
         b2b: 2,
@@ -36,5 +53,10 @@ module.exports = Object.freeze({
         instagram   : 'instagram',
         twitter     : 'twitter',
         facebook    : 'facebook'
-    }
+    },
+    reservedHandles : [
+        'search', 'find', 'user', 'users', 'featured', 'top', 'people', 'profile', 'campaign', 'marketing', 'sale', 'sales', 'competition',
+        'portfolio', 'profiles', 'portfolios', 'hi', 'terms', 'privacy', 'tnc', 'termsandconditions', 'privacypolicy', 'team', 'competitions',
+        'sitemap', 'blog', 'contact', 'dev', 'chat', 'message', 'event', 'customer', 'customers', 'sp', 'serviceprovider', 'serviceproviders'
+    ]
 })
