@@ -1,5 +1,4 @@
-const mongoose              = require('mongoose'),
-      constants             = require('../../utils/constants');
+const mongoose              = require('mongoose');
 
 const businessTypesSchema   = mongoose.Schema({
     name                    : {type: String, required: true},

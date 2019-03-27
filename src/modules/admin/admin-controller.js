@@ -16,7 +16,7 @@ const login                     = async (req, res, next) => {
         if(!await bcrypt.comparePassword(password, admin.password))
             throw errify.unauthorized(errMsg[1002], '1002')
         const sessionId         = await sessions.createSession(admin._id, constants.userRoles.admin, admin.roles, platform, deviceToken)
-        admin['accessToken']    = await authentication.generateToken(admin._id, sessionId, constants.userRoles.admin, admin.roles, platform)
+        admin['authorization']  = await authentication.generateToken(admin._id, sessionId, constants.userRoles.admin, admin.roles, platform)
         delete admin.password
         return res.send(admin)
     } catch (err) {

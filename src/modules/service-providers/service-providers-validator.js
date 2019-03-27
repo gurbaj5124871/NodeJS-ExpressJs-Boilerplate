@@ -30,6 +30,15 @@ const signup                = celebrate({
     })
 })
 
+const login                 = celebrate({
+    body                    : Joi.object().keys({
+        email               : Joi.string().email(),
+        phoneNumber         : Joi.string().regex(/^[0-9]+$/).min(5),
+        password            : Joi.string().required()
+    }).xor('email', 'phoneNumber')
+})
+
 module.exports              = {
-    signup
+    signup,
+    login
 }

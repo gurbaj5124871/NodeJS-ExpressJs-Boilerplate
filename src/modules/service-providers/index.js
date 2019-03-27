@@ -11,6 +11,9 @@ router.post('/', authentication.verifyToken, accessAllowed('create', resource.se
 
 router.post('/signup', validator.signup, controller.signup)
 
+router.post('/login', validator.login, controller.login)
+
+router.post('/logout', authentication.verifyToken, controller.logout)
 // router.get('/:userId', authentication.verifyToken, validator.updateSserviceProviderById, controller.updateSserviceProviderById)
 
 // router.get('/handle/:handle', authentication.verifyToken, validator.updateSserviceProviderById, controller.updateSserviceProviderById)

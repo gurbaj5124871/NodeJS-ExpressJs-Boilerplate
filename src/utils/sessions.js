@@ -16,10 +16,10 @@ function getSessionKey(userId, role){
     return sessionkey          
 }
 
-const createSession                 = async (userId, role, roles, platform, deviceToken) => {
+const createSession                 = async (userId, role, roles, platform, deviceToken, appVersion) => {
     const sessionkey                = getSessionKey(userId, role)
     const sessionId                 = ObjectId().toHexString()
-    await redis.hmsetAsync(sessionkey, sessionId, JSON.stringify({userId, sessionId, role, roles, platform, deviceToken}))
+    await redis.hmsetAsync(sessionkey, sessionId, JSON.stringify({userId, sessionId, role, roles, platform, deviceToken, appVersion}))
     return sessionId
 }
 

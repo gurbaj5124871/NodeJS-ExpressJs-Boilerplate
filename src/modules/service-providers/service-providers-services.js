@@ -1,11 +1,16 @@
 const ServiceProvider               = require('./service-provider-model'),
     businessTypesServices           = require('../business-types/business-types-services'),
     bcrypt                          = require('../../utils/bcrypt'),
+    logger                          = require('../../utils/logger'),
     constants                       = require('../../utils/constants'),
     universalFunc                   = require('../../utils/universal-functions'),
     errify                          = require('../../utils/errify'),
     errMsg                          = require('../../utils/error-messages'),
-    mongo                           = require('../../utils/mongo');
+    mongo                           = require('../../utils/mongo'),
+    authentication                  = require('../../utils/authentication'),
+    sessions                        = require('../../utils/sessions'),
+    randomNumber                    = require('../../utils/random-number-generator')
+                                        .generator({min: 100000, max: 999999, integer: true});
 
 const serviceProviderExistanceCheck = async (email, phoneNumber, isEmailVerified = true, isPhoneVerified = true) => {
     const criteria                  = {$or: [{email}, {phoneNumber}]}
@@ -65,6 +70,31 @@ const getNewHandle                  = async (firstName, lastName, userId) => {
     }
 }
 
+function getServiceProvider(criteria){
+    const projections               = {lastActivityAt: 0, emailVerificationToken: 0, phoneVerificationToken: 0}
+    return mongo.findOne(ServiceProvider, criteria, projections, {lean: true})
+}
+
+const getServiceProviderByEmailOrPhoneNumber = (email, phoneNumber) => {
+    const criteria                  = email ? {email} : {phoneNumber};
+    return getServiceProvider(criteria)
+}
+
+const getServiceProviderById        = _id => getServiceProvider({_id})
+
+const verificationCheckServiceProvider = sp => {
+    if(sp.isEmailVerified === false && sp.isPhoneVerified === false)
+        throw errify.unauthorized(errMsg['1007'], 1007)
+    if(sp.isEmailVerified === false)
+        throw errify.unauthorized(errMsg['1005'], 1005)
+    if(sp.isPhoneVerified === false)
+        throw errify.unauthorized(errMsg['1006'], 1006)
+    if(sp.isAdminVerified === false)
+        throw errify.unauthorized(errMsg['1012'], 1012)
+    if(sp.isBloecked === false)
+        throw errify.unauthorized(errMsg['1013'], 1013)
+}
+
 const verifyServiceProvider         = (spId, isEmailVerified = false, isPhoneVerified = false) => {
     let dataToUpdate                = {isAdminVerified: true}
     if(isEmailVerified)
@@ -74,22 +104,54 @@ const verifyServiceProvider         = (spId, isEmailVerified = false, isPhoneVer
     return ServiceProvider.updateOne({_id: spId}, {$set: dataToUpdate})
 }
 
-const sendEmailVerificationMail     = (spId, email) => {
-
+const sendEmailVerificationMail     = async (spId, email) => {
+    try {
+        const emailVerificationToken= randomNumber()
+        const update = await mongo.updateOne(ServiceProvider, {_id: spId, email, isEmailVerified: false}, {$set: {emailVerificationToken}})
+        // send email to the service provider
+    } catch (err) {
+        logger.warn({message: `Error while sending verification mail to ${email}`, err})
+    }
 }
 
-const sendPhoneVerificationOTP      = (spId, extention, phoneNumber) => {
-    
+const sendPhoneVerificationOTP      = async (spId, extention, phoneNumber) => {
+    try {
+        const phoneVerificationToken= randomNumber()
+        const update = await mongo.updateOne(ServiceProvider, {_id: spId, phoneNumber, isEmailVerified: false}, {$set: {phoneVerificationToken}})
+        // send sms to the service provider
+    } catch (err) {
+        logger.warn({message: `Error while sending verification sms to ${phoneNumber}`, err})
+    }
 }
 
-// const updateServiceProvider         = async body => {
+const comparePassword               = (inputPass, dbPass) => bcrypt.comparePassword(inputPass, dbPass)
 
-// }
+const createSession                 = async (userId, roles, platform, deviceToken, appVersion) => {
+    const sessionId                 = await sessions.createSession(userId, constants.userRoles.serviceProvider, roles, platform, deviceToken, appVersion)
+    return authentication.generateToken(userId, sessionId, constants.userRoles.serviceProvider, roles, platform)
+}
+
+const expireSession                 = (userId, sessionId) => sessions.expireSessionFromToken({userId, sessionId, role: constants.userRoles.serviceProvider})
+
+const updateSPLastActivity          = _id => {
+    try {
+        return mongo.updateOne(ServiceProvider, {_id}, {$set: {lastActivityAt: new Date()}})
+    } catch (err) {
+        logger.warn({message: `Error while updating service providers lastActivityAt`, err})
+    }
+}
 
 module.exports = {
     serviceProviderExistanceCheck,
     createServiceProvider,
+    getServiceProviderByEmailOrPhoneNumber,
+    getServiceProviderById,
+    verificationCheckServiceProvider,
     verifyServiceProvider,
     sendEmailVerificationMail,
-    sendPhoneVerificationOTP
+    sendPhoneVerificationOTP,
+    comparePassword,
+    createSession,
+    expireSession,
+    updateSPLastActivity
 }

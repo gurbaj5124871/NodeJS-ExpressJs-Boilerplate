@@ -32,6 +32,7 @@ const serviceProviderSchema = mongoose.Schema({
     socialMediaLinks        : socialMediaLinks,
     roles                   : [String],
     businessType            : {type: mongoose.Schema.ObjectId, ref: 'BusinessTypes'},
+    businessSubTypes        : [{type: mongoose.Schema.ObjectId, ref: 'BusinessSubTypes'}],
     businessModelTypes      : [{type: Number, enum: Object.values(constants.businessModelTypes)}],
     ownershipType           : {type: Number, vaild: Object.values(constants.businessOwnershipTypes)},
 
@@ -45,12 +46,7 @@ const serviceProviderSchema = mongoose.Schema({
     emailVerificationToken  : String,
     phoneVerificationToken  : Number, // OTP
 
-    lastActivityAt          : Date,
-    userTracking            : {
-        platform            : {type: String, enum: ['android', 'ios', 'web']},
-        appVersion          : String,
-        lastAppOpenedAt     : Date,
-    }
+    lastActivityAt          : Date
 }, {timestamps: true, read: 'primaryPreferred', useNestedStrict: true});
 
 const ServiceProvider       = mongoose.model('ServiceProvider', serviceProviderSchema);

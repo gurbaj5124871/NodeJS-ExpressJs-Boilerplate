@@ -34,7 +34,7 @@ const customerSchema        = mongoose.Schema({
     dob                     : Date,
     socialMediaLinks        : [{type: socialMediaLinks, default: void 0}],
     googleLocation          : googleLocation,
-    businessInterests       : [{type: mongoose.Schema.ObjectId, ref: 'BusinessTypes'}],
+    businessInterests       : [{type: mongoose.Schema.ObjectId, ref: 'BusinessSubTypes'}],
     roles                   : [String],
     noOfBusinessesFollowed  : {type: Number, default: 0},
 
@@ -45,12 +45,7 @@ const customerSchema        = mongoose.Schema({
     emailVerificationToken  : String,
     phoneVerificationToken  : Number, // OTP
 
-    lastActivityAt          : Date,
-    userTracking            : {
-        platform            : {type: String, enum: ['android', 'ios', 'web']},
-        appVersion          : String,
-        lastAppOpenedAt     : Date,
-    }
+    lastActivityAt          : Date
 }, {timestamps: true, read: 'primaryPreferred', useNestedStrict: true});
 
 const Customer              = mongoose.model('Customer', customerSchema);

@@ -27,7 +27,8 @@ module.exports = Object.freeze({
         admin           : 'admin',
         customer        : 'customer',
         serviceProvider : 'serviceProvider',
-        businessTypes   : 'businessModelTypes'
+        businessTypes   : 'businessTypes',
+        businessSubTypes: 'businessSubTypes'
     },
     businessModelTypes: {
         b2c: 1,

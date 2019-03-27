@@ -11,12 +11,15 @@ for(let key in constants.accessRoles)
 accessControl
     .grant(role.customer)
     .readAny(resource.businessTypes)
+    .readAny(resource.businessSubTypes)
 
 // Service Provider Specific
 accessControl
     .grant(role.serviceProvider)
     .readAny(resource.businessTypes)
     .create(resource.businessTypes)
+    .readAny(resource.businessSubTypes)
+    .create(resource.businessSubTypes)
 
 // Admin Specific
 accessControl
@@ -25,6 +28,9 @@ accessControl
     .readAny(resource.businessTypes)
     .create(resource.businessTypes)
     .updateAny(resource.businessTypes)
+    .create(resource.businessSubTypes)
+    .readAny(resource.businessSubTypes)
+    .updateAny(resource.businessSubTypes)
     .create(resource.serviceProvider)
     .create(resource.customer)
 
