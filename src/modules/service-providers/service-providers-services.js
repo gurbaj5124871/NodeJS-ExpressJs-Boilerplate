@@ -1,5 +1,6 @@
 const ServiceProvider               = require('./service-provider-model'),
     businessTypesServices           = require('../business-types/business-types-services'),
+    businessSubTypesServices        = require('../business-subtypes/business-subtypes-services'),
     bcrypt                          = require('../../utils/bcrypt'),
     logger                          = require('../../utils/logger'),
     constants                       = require('../../utils/constants'),
@@ -9,15 +10,25 @@ const ServiceProvider               = require('./service-provider-model'),
     mongo                           = require('../../utils/mongo'),
     authentication                  = require('../../utils/authentication'),
     sessions                        = require('../../utils/sessions'),
+    accessControl                   = require('../../utils/authorization').accessControl,
+    resource                        = constants.resource,
     randomNumber                    = require('../../utils/random-number-generator')
                                         .generator({min: 100000, max: 999999, integer: true});
 
-const serviceProviderExistanceCheck = async (email, phoneNumber, isEmailVerified = true, isPhoneVerified = true) => {
-    const criteria                  = {$or: [{email}, {phoneNumber}]}
-    if(isEmailVerified)
-        criteria.$or[0].isEmailVerified = isEmailVerified
-    if(isPhoneVerified)
-        criteria.$or[0].isPhoneVerified = isPhoneVerified
+const serviceProviderExistanceCheck = async (email, phoneNumber, isEmailVerified = false, isPhoneVerified = false) => {
+    const criteria                  = {$or: [/*{email}, {phoneNumber}*/]}
+    if(email)                       {
+        const match                 = {email}
+        if(isEmailVerified)
+            match.isEmailVerified   = isEmailVerified
+        criteria.$or.push(match)
+    }
+    if(phoneNumber)                 {
+        const match                 = {phoneNumber}
+        if(isPhoneVerified)
+            match.isPhoneVerified   = isPhoneVerified
+        criteria.$or.push(match)
+    }
     const sp = await ServiceProvider.findOne(criteria, {email: 1, phoneNumber: 1, extention: 1, isEmailVerified: 1, isPhoneVerified: 1}, {lean: true})
     if(sp)
         return {userExists: true, user: sp}
@@ -70,17 +81,45 @@ const getNewHandle                  = async (firstName, lastName, userId) => {
     }
 }
 
-function getServiceProvider(criteria){
-    const projections               = {lastActivityAt: 0, emailVerificationToken: 0, phoneVerificationToken: 0}
-    return mongo.findOne(ServiceProvider, criteria, projections, {lean: true})
+async function handleExistanceCheck(handle) {
+    if(await ServiceProvider.findOne({handle}, {_id: 1}))
+        return true
+    else return false
 }
 
-const getServiceProviderByEmailOrPhoneNumber = (email, phoneNumber) => {
+function getServiceProvider(criteria, projections = {}) {
+    if(Object.keys(projections).length === 0)
+    projections     = {lastActivityAt: 0, emailVerificationToken: 0, phoneVerificationToken: 0, __v: 0}
+    const pipeline  = [{$match: criteria}, {$project: projections}]
+    if(projections.businessType)
+        pipeline.push([
+            {$lookup: {from: 'businesstypes', localField: 'businessType', foreignField: '_id', as: 'businessType'}},
+            {$unwind: '$businessType'},
+            {$addFields: {businessType: {
+                name: '$businessType.name', businessTerm: '$businessType.businessTerm',
+                customerTerm: '$businessType.customerTerm', imageUrl: '$businessType.imageUrl'
+            }}}
+        ])
+    if(projections.businessSubTypes)
+        pipeline.push([
+            {$lookup: {from: 'businesssubtypes', localField: 'businessSubTypes', foreignField: '_id', as: 'businesssubtypes'}},
+            {$addFields: {businessSubTypes: {$map: {input: '$businessSubTypes', as: 'bst', in: {
+                name: '$$bst.name', businessTerm: '$$bst.businessTerm', customerTerm: '$$bst.customerTerm', imageUrl: '$$bst.imageUrl'
+            }}}}}
+        ])
+    return mongo.aggregate(ServiceProvider, pipeline)
+}
+
+const getServiceProviderByEmailOrPhoneNumber = async (email, phoneNumber) => {
     const criteria                  = email ? {email} : {phoneNumber};
-    return getServiceProvider(criteria)
+    const serviceProvider           = await getServiceProvider(criteria)
+    return serviceProvider.length ? serviceProvider[0] : null
 }
 
-const getServiceProviderById        = _id => getServiceProvider({_id})
+const getServiceProviderById        = async (_id, projections) => {
+    const serviceProvider           = await getServiceProvider({_id, isDeleted: false}, projections)
+    return serviceProvider.length ? serviceProvider[0] : null
+}
 
 const verificationCheckServiceProvider = sp => {
     if(sp.isEmailVerified === false && sp.isPhoneVerified === false)
@@ -102,6 +141,37 @@ const verifyServiceProvider         = (spId, isEmailVerified = false, isPhoneVer
     if(isPhoneVerified)
         dataToUpdate                = Object.assign(dataToUpdate, {isPhoneVerified})
     return ServiceProvider.updateOne({_id: spId}, {$set: dataToUpdate})
+}
+
+const updateServiceProvider         = async (spId , data) => {
+    if(data.businessType || data.businessModelTypes || data.ownershipType) {
+        data.isAdminVerified        = false
+        if(data.businessType)       {
+            if(! await businessTypesServices.getBusinessTypeById(data.businessType))
+                throw errify.badRequest(errMsg['1008'], 1008)
+        }
+    }
+    if(data.handle) {
+        if(constants.reservedHandles.includes(data.handle))
+            throw errify.badData(errMsg['1015'], 1015)
+        if(handleExistanceCheck(data.handle))
+            throw errify.badData(errMsg['1015'], 1015)
+    }
+    return ServiceProvider.findOneAndUpdate({_id: spId}, {$set: data}, {lean: true, new: true})
+}
+
+const addBusinessSubTypes           = async (spId, businessSubTypes) => {
+    businessSubTypes                = (await businessSubTypesServices.getMultipleBusinessSubTypes(businessSubTypes, true, {_id: 1}))
+                                        .map(obj => obj._id);
+    if(businessSubTypes.length)
+        return ServiceProvider.updateOne({_id: spId}, {$addToSet: {businessSubTypes}})
+}
+
+const replaceBusinessSubTypes       = async (spId, businessSubTypes) => {
+    businessSubTypes                = (await businessSubTypesServices.getMultipleBusinessSubTypes(businessSubTypes, true, {_id: 1}))
+                                        .map(obj => obj._id);
+    if(businessSubTypes.length)
+        return ServiceProvider.updateOne({_id: spId}, {$set: {businessSubTypes}})
 }
 
 const sendEmailVerificationMail     = async (spId, email) => {
@@ -141,6 +211,27 @@ const updateSPLastActivity          = _id => {
     }
 }
 
+/**************************** PERMISSIONS and VALIDITY ***********************************/
+
+const getServiceProvicerAttributesPermission = (requestSP, spId) => {
+    if (requestSP === undefined) {
+        const openProfile = accessControl.can(constants.userRoles.customer).readAny(resource.serviceProvider)
+        openProfile._.attributes.push('!phoneNumber', '!extention', '!email')
+        return openProfile
+    }
+    else if (requestSP.userId === spId)
+        return accessControl.can(requestSP.roles).readOwn(resource.serviceProvider)
+    else
+        return accessControl.can(requestSP.roles).readAny(resource.serviceProvider)
+}
+
+const updateServiceProviderPermissionCheck = (requestUser, spId) => {
+    if(accessControl.can(requestUser.roles).updadeAny(resource.serviceProvider))
+        return true
+    if(requestUser.userId !== spId)
+        throw errify.badRequest()
+}
+
 module.exports = {
     serviceProviderExistanceCheck,
     createServiceProvider,
@@ -148,10 +239,17 @@ module.exports = {
     getServiceProviderById,
     verificationCheckServiceProvider,
     verifyServiceProvider,
+    updateServiceProvider,
+    replaceBusinessSubTypes,
+    addBusinessSubTypes,
     sendEmailVerificationMail,
     sendPhoneVerificationOTP,
     comparePassword,
     createSession,
     expireSession,
-    updateSPLastActivity
+    updateSPLastActivity,
+
+    // Permissions and Valadities
+    getServiceProvicerAttributesPermission,
+    updateServiceProviderPermissionCheck
 }

@@ -6,7 +6,7 @@ const redisKeys             = Object.freeze({
     businessTypes           : `businessTypes:`,
 
     // Hash map storing customers sessions [ NEVER EXPIRE ON PROD] {key : {sessionId: session}}
-    customerSession         : customerId => `cutomerSession:${customerId}`,
+    customerSession         : customerId => `customerSession:${customerId}`,
 
     // Hash map storing service provider sessions [ NEVER EXPIRE ON PROD] {key : {sessionId: session}}
     serviceProviderSession  : serviceProviderId => `serviceProviderSession:${serviceProviderId}`,

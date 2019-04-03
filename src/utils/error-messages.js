@@ -12,5 +12,7 @@ module.exports  = Object.freeze({
   '1010'        : `Customer already exists`,
   '1011'        : `Phone number or password are incorrect`,
   '1012'        : `Your account has not been verified by admin yet. It usually take less than 2 days. For further info kindy contact us on support@dhandahub.com`,
-  '1013'        : `Your account has been blocked by admin. Kindy contact us on support@dhandahub.com`
+  '1013'        : `Your account has been blocked by admin. Kindy contact us on support@dhandahub.com`,
+  '1014'        : `Service Provider not found`,
+  '1015'        : `Handle is already Taken`
 })

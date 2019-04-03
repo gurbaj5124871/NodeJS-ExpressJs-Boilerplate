@@ -1,6 +1,6 @@
 const logger                = require('./logger'),
     errMsg                  = require('./error-messages'),
-    {isCelebrate}         = require('celebrate');
+    {isCelebrate}           = require('celebrate');
 
 const errorhandlerMiddleware= (err, req, res, next) => {
     logger.error(err)

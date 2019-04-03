@@ -14,10 +14,16 @@ router.post('/signup', validator.signup, controller.signup)
 router.post('/login', validator.login, controller.login)
 
 router.post('/logout', authentication.verifyToken, controller.logout)
-// router.get('/:userId', authentication.verifyToken, validator.updateSserviceProviderById, controller.updateSserviceProviderById)
 
-// router.get('/handle/:handle', authentication.verifyToken, validator.updateSserviceProviderById, controller.updateSserviceProviderById)
+// admin api to get all service providers
+router.get('/', authentication.verifyToken, accessAllowed('readAny', resource.allServiceProviders), validator.getAllServiceProviders, controller.getAllServiceProviders)
 
-// router.patch('/:userId', authentication.verifyToken, validator.updateSserviceProviderById, controller.updateSserviceProviderById)
+router.get('/:serviceProvider', authentication.verifyTokenIfExists, validator.getServiceProviderById, controller.getServiceProviderById)
+
+router.get('/handle/:handle', authentication.verifyTokenIfExists, validator.getServiceProviderByHandle, controller.getServiceProviderByHandle)
+
+router.patch('/:serviceProvider', authentication.verifyToken, validator.updateServiceProviderById, controller.updateServiceProviderById)
+
+router.patch('/:serviceProvider/updateBusinessSubTypes', authentication.verifyToken, validator.updateBusinessSubTypes, controller.updateBusinessSubTypes)
 
 module.exports      = router

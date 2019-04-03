@@ -1,6 +1,6 @@
 module.exports = Object.freeze({
     userRoles: {
-        customer        : 'cutomer',
+        customer        : 'customer',
         serviceProvider : 'serviceProvider',
         admin           : 'admin'
     },
@@ -28,7 +28,9 @@ module.exports = Object.freeze({
         customer        : 'customer',
         serviceProvider : 'serviceProvider',
         businessTypes   : 'businessTypes',
-        businessSubTypes: 'businessSubTypes'
+        businessSubTypes: 'businessSubTypes',
+        allServiceProviders: 'allServiceProviders',
+        allCustomers    : 'allCustomers'
     },
     businessModelTypes: {
         b2c: 1,

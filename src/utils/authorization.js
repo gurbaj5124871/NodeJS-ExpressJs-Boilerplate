@@ -12,6 +12,16 @@ accessControl
     .grant(role.customer)
     .readAny(resource.businessTypes)
     .readAny(resource.businessSubTypes)
+    .readAny(resource.serviceProvider, [
+        '*', '!password', '!isAdminVerified', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!noOfCustomersFollowing',
+        '!isEmailVerified', '!isPhoneVerified', '!emailVerificationToken', '!phoneVerificationToken', '!businessModelTypes'
+    ])
+    .readAny(resource.customer, [
+        '*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId','!dob', '!lastActivityAt',
+        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender'
+    ])
+    .readOwn(resource.customer, ['*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!lastActivityAt'])
+    .updateOwn(resource.customer)
 
 // Service Provider Specific
 accessControl
@@ -20,6 +30,16 @@ accessControl
     .create(resource.businessTypes)
     .readAny(resource.businessSubTypes)
     .create(resource.businessSubTypes)
+    .readAny(resource.serviceProvider, [
+        '*', '!password', '!isAdminVerified', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!businessSubTypes',
+        '!isEmailVerified', '!isPhoneVerified', '!emailVerificationToken', '!phoneVerificationToken', '!businessModelTypes', '!noOfCustomersFollowing'
+    ])
+    .readOwn(resource.serviceProvider, ['*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!lastActivityAt'])
+    .readAny(resource.customer, [
+        '*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId','!dob', '!lastActivityAt',
+        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender'
+    ])
+    .updateOwn(resource.serviceProvider)
 
 // Admin Specific
 accessControl
@@ -33,6 +53,12 @@ accessControl
     .updateAny(resource.businessSubTypes)
     .create(resource.serviceProvider)
     .create(resource.customer)
+    .readAny(resource.serviceProvider, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.customer, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.allServiceProviders, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.allCustomers, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .updateAny(resource.serviceProvider)
+    .updateAny(resource.customer)
 
 const accessAllowed = (actionName, resource) => {
     return (req, res, next) => {
