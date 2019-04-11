@@ -4,9 +4,7 @@ const {redis, redisKeys}            = require('./redis'),
 
 function getSessionKey(userId, role){
     const sessionkey                = (role => {
-        let roles                   = {}
-        for(let key in constants.accessRoles)
-            roles                   = Object.assign(roles, constants.accessRoles[key])
+        const roles                 = constants.userRoles
         switch(role)                {
             case roles.customer     : return redisKeys.customerSession(userId)
             case roles.serviceProvider: return redisKeys.serviceProviderSession(userId)

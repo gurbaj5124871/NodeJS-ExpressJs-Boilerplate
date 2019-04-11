@@ -14,6 +14,8 @@ const redisKeys             = Object.freeze({
     // Hash map storing admins sessions {key : {sessionId: session}}
     adminSession            : adminId => `adminSession:${adminId}`,
 
+    // key value which should have expiration
+    customerPhoneVerification: phoneNumber => `customerPhoneVerification:${phoneNumber}`,
     
     
 })

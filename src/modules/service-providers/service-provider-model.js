@@ -29,7 +29,7 @@ const serviceProviderSchema = mongoose.Schema({
     imageUrl                : String,
     description             : String,
     googleLocation          : googleLocation,
-    socialMediaLinks        : socialMediaLinks,
+    socialMediaLinks        : {type: [socialMediaLinks], default: void 0},
     roles                   : [String],
     businessType            : {type: mongoose.Schema.ObjectId, ref: 'BusinessTypes'},
     businessSubTypes        : [{type: mongoose.Schema.ObjectId, ref: 'BusinessSubTypes'}],
