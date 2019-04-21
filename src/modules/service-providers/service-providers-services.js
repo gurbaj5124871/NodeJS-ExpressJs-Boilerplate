@@ -43,7 +43,7 @@ const createServiceProvider         = async sp => {
         throw errify.conflict(errMsg['1009'], 1009)
     const serviceProvider           = {
         _id: mongo.getObjectId(), email: sp.email, phoneNumber: sp.phoneNumber, extention: sp.extention, name: sp.name,
-        googleLocation: sp.googleLocation, businessType: sp.businessType, businessModelTypes: sp.businessModelTypes,
+        googleLocation: [sp.googleLocation], businessType: sp.businessType, businessModelTypes: sp.businessModelTypes,
         ownershipType: sp.ownershipType, roles: [constants.accessRoles.serviceProvider.serviceProvider],
         password: await bcrypt.hashPassword(sp.password)
     }

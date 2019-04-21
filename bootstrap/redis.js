@@ -20,7 +20,7 @@ const redisClient        = redis.createClient({
 })
 
 redisClient.on('connect', () => {
-    logger.info(`Thor (redis) connected`)
+    logger.info(`Flash (redis) connected`)
 })
 
 redisClient.on('error', err => {

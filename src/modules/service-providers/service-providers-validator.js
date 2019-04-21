@@ -71,16 +71,16 @@ const updateServiceProviderById = celebrate({
         handle              : Joi.string().regex(urlSafeRegex),
         imageUrl            : Joi.string().uri({scheme: ['https']}),
         description         : Joi.string().max(2000),
-        googleLocation      : Joi.object().keys({
-            country         : Joi.string().max(2000),
-            region          : Joi.string().max(2000),
-            locality        : Joi.string().max(2000),
-            placeId         : Joi.string().max(2000),
-            loc             : Joi.object().keys({
-                type        : Joi.string().valid('Point').default('Point'),
-                coordinates : Joi.array().items(Joi.number()).min(2).max(2).required()
-            }).required()
-        }),
+        // googleLocation      : Joi.object().keys({
+        //     country         : Joi.string().max(2000),
+        //     region          : Joi.string().max(2000),
+        //     locality        : Joi.string().max(2000),
+        //     placeId         : Joi.string().max(2000),
+        //     loc             : Joi.object().keys({
+        //         type        : Joi.string().valid('Point').default('Point'),
+        //         coordinates : Joi.array().items(Joi.number()).min(2).max(2).required()
+        //     }).required()
+        // }),
         businessType        : Joi.string().regex(mongoIdRegex),
         businessModelTypes  : Joi.array().items(
             Joi.number().integer().valid(Object.values(constants.businessModelTypes))

@@ -1,13 +1,14 @@
 const mongoose              = require('mongoose'),
       constants             = require('../../utils/constants');
 
-const googleLocation        = {
+const googleLocation        = mongoose.Schema({
     country                 : String,
     region                  : String,
     locality                : String,
     placeId                 : String,
     loc                     : {type: {type: String}, coordinates: {type: [Number], default: void 0}}
-}
+})
+googleLocation.index({'googleLocation.loc': '2dsphere'});
 
 const socialMediaLinks      = {
     type                    : {type: String, enum: Object.values(constants.socialProfileTypes)},
@@ -28,7 +29,7 @@ const serviceProviderSchema = mongoose.Schema({
     handle                  : {type: String, required: true, index: true},
     imageUrl                : String,
     description             : String,
-    googleLocation          : googleLocation,
+    googleLocation          : [{type: googleLocation, default: void 0}],
     socialMediaLinks        : {type: [socialMediaLinks], default: void 0},
     roles                   : [String],
     businessType            : {type: mongoose.Schema.ObjectId, ref: 'BusinessTypes'},
