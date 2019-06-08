@@ -1,3 +1,5 @@
+'use strict'
+
 const { celebrate, Joi }    = require('celebrate'),
     constants               = require('../../utils/constants'),
     mongoIdRegex            = /^[0-9a-fA-F]{24}$/;

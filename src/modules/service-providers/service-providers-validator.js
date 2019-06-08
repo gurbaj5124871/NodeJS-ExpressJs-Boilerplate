@@ -1,3 +1,5 @@
+'use strict'
+
 const { celebrate, Joi }    = require('celebrate'),
     constants               = require('../../utils/constants'),
     mongoIdRegex            = /^[0-9a-fA-F]{24}$/,
@@ -24,10 +26,10 @@ const signup                = celebrate({
             }).required()
         }).required(),
         businessType        : Joi.string().required().regex(mongoIdRegex),
-        businessModelTypes  : Joi.array().items(
-            Joi.number().integer().valid(Object.values(constants.businessModelTypes))
-        ).required().min(1).max(Object.keys(constants.businessModelTypes).length),
-        ownershipType       : Joi.number().integer().valid(Object.values(constants.businessOwnershipTypes)).required()
+        // businessModelTypes  : Joi.array().items(
+        //     Joi.number().integer().valid(Object.values(constants.businessModelTypes))
+        // ).required().min(1).max(Object.keys(constants.businessModelTypes).length),
+        // ownershipType       : Joi.number().integer().valid(Object.values(constants.businessOwnershipTypes)).required()
     })
 })
 

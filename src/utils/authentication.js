@@ -1,7 +1,9 @@
+'use strict'
+
 const bluebird          = require('bluebird'), 
     jwt                 = bluebird.promisifyAll(require('jsonwebtoken')),
     sessions            = require('./sessions'),
-    config              = require('../../app-config'),
+    config              = require('../../config'),
     errify              = require('./errify');
 
 const secret            = config.get('/jwt/secret')

@@ -1,15 +1,15 @@
-module.exports = Object.freeze({
-    userRoles: {
+module.exports          = Object.freeze({
+    userRoles           : {
         customer        : 'customer',
         serviceProvider : 'serviceProvider',
         admin           : 'admin'
     },
-    accessRoles: {
-        admin: {
+    accessRoles         : {
+        admin           : {
             admin       : 'admin',
             superAdmin  : 'superAdmin'
         },
-        customer: {
+        customer        : {
             customer    : 'customer',
             influencer  : 'influencer'
         },
@@ -17,13 +17,13 @@ module.exports = Object.freeze({
             serviceProvider: 'serviceProvider'
         }
     },
-    platforms: {
+    platforms           : {
         android         : 'android',
         ios             : 'ios',
         web             : 'web',
         mobileWeb       : 'mobileWeb'
     },
-    resource: {
+    resource            : {
         admin           : 'admin',
         customer        : 'customer',
         serviceProvider : 'serviceProvider',
@@ -32,7 +32,7 @@ module.exports = Object.freeze({
         allServiceProviders: 'allServiceProviders',
         allCustomers    : 'allCustomers'
     },
-    businessModelTypes: {
+    businessModelTypes  : {
         b2c: 1,
         b2b: 2,
         c2c: 3,
@@ -40,7 +40,7 @@ module.exports = Object.freeze({
         g2c: 5,
         g2b: 6
     },
-    businessOwnershipTypes: {
+    businessOwnershipTypes  : {
         soleProprietor      : 1, // very small businesses, single owner or a married couple. ex:  man-in-a-van type bussiness
         partnership         : 2, // relationship existing between two or more persons who join to carry on a trade or business
 
@@ -51,7 +51,7 @@ module.exports = Object.freeze({
         franchise           : 4, // Franchises are licensing arrangements whereby an individual or group can buy the right to trade and produce under a well-known brand name in a given locality
         limitedLiability    : 5 // Limited liability is a type of liability that does not exceed the amount invested in a partnership or limited liability company.
     },
-    socialProfileTypes: {
+    socialProfileTypes      : {
         youtube     : 'youtube',
         instagram   : 'instagram',
         twitter     : 'twitter',

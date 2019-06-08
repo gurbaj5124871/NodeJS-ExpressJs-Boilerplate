@@ -1,3 +1,5 @@
+'use strict'
+
 const mongo                     = require('../../utils/mongo'),
     constants                   = require('../../utils/constants'),
     errify                      = require('../../utils/errify'),

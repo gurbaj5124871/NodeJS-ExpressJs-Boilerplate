@@ -1,4 +1,6 @@
-const mongoose = require('mongoose')
+'use strict'
+
+const mongoose  = require('mongoose');
 
 // CRUD Services for mongodb
 
@@ -10,15 +12,15 @@ const insertMany = async (model, docs) => {
     return new Promise((res, rej) => { model.insertMany(docs, (e, data) => { if (e) { rej(e) } else { res(data) } }) })
 }
 
-const find = async(model, criteria, projection, options) => {
+const find      = async(model, criteria, projection, options) => {
     return model.findAsync(criteria, projection, options)
 }
 
-const findOne = async (model, criteria, projection, options) => {
+const findOne   = async (model, criteria, projection, options) => {
     return model.findOneAsync(criteria, projection, options)
 }
 
-const count = async (model, criteria) => {
+const count     = async (model, criteria) => {
     return model.countDocumentsAsync(criteria)
 }
 
@@ -66,9 +68,9 @@ const insertManyWithPopulate = async (model, arrayToSave, populateOptions) => {
     })
 }
 
-const getObjectId = () => mongoose.Types.ObjectId()
+const getObjectId   = () => mongoose.Types.ObjectId()
 
-module.exports = {
+module.exports      = {
     createOne,
     insertMany,
     find,

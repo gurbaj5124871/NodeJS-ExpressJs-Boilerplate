@@ -1,3 +1,5 @@
+'use strict'
+
 const mongo                     = require('../../utils/mongo'),
     bcrypt                      = require('../../utils/bcrypt'),
     sessions                    = require('../../utils/sessions'), 

@@ -1,6 +1,8 @@
+'use strict'
+
 const Promise       = require('bluebird'),
       mongoose      = Promise.promisifyAll(require('mongoose')),
-      appConfig     = require('../app-config'),
+      config        = require('../config'),
       logger        = require('../src/utils/logger');
 
 
@@ -8,7 +10,7 @@ mongoose.Promise    = Promise
 
 function mongodbConnect() {
     return new Promise((res, rej) => {
-        mongoose.connect(appConfig.get('/mongodb'), { useNewUrlParser: true, useCreateIndex: true })
+        mongoose.connect(config.get('/mongodb'), { useNewUrlParser: true, useCreateIndex: true })
             .then(() => {
                 logger.info('Captain America (Mongo DB) Connected')
 

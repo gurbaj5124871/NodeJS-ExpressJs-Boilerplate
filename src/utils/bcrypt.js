@@ -1,3 +1,5 @@
+'use strict'
+
 const bluebird          = require('bluebird'), 
     bcrypt              = bluebird.promisifyAll(require('bcrypt'));
 

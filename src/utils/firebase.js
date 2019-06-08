@@ -1,3 +1,5 @@
+'use strict'
+
 const admin             = require("firebase-admin"),
       serviceAccount    = require('../modules/notifications/notification-config.json');
 

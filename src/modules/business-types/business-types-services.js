@@ -1,3 +1,5 @@
+'use strict'
+
 const mongo                     = require('../../utils/mongo'),
     {redis, redisKeys}          = require('../../utils/redis'),
     BusinessTypes               = require('./business-types-model');

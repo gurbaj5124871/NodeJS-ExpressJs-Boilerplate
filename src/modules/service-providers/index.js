@@ -1,3 +1,5 @@
+'use strict'
+
 const express       = require('express'),
     router          = express.Router(),
     authentication  = require('../../utils/authentication'),
@@ -24,6 +26,6 @@ router.get('/handle/:handle', authentication.verifyTokenIfExists, validator.getS
 
 router.patch('/:serviceProvider', authentication.verifyToken, validator.updateServiceProviderById, controller.updateServiceProviderById)
 
-router.patch('/:serviceProvider/updateBusinessSubTypes', authentication.verifyToken, validator.updateBusinessSubTypes, controller.updateBusinessSubTypes)
+//router.patch('/:serviceProvider/updateBusinessSubTypes', authentication.verifyToken, validator.updateBusinessSubTypes, controller.updateBusinessSubTypes)
 
 module.exports      = router

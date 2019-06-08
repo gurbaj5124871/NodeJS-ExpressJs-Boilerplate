@@ -1,3 +1,5 @@
+'use strict'
+
 const   express                 = require('express'),
         bodyParser              = require('body-parser'),
         morgan                  = require('morgan'),
@@ -5,9 +7,9 @@ const   express                 = require('express'),
         logger                  = require('./src/utils/logger'),
         path                    = require('path'),
         helmet                  = require('helmet'),
-        nodeStats               = require('./src/utils/node-stats');
+        nodeStats               = require('./src/utils/node-stats'),
         favicon                 = require('serve-favicon'),
-        config                  = require('./app-config');
+        config                  = require('./config');
 
 const   app                     = express();
 
@@ -37,7 +39,7 @@ app.use(function (req, res, next) {
 
 if(process.env.NODE_ENV === 'prod') {
     app.use(express.static(path.join(__dirname, 'public')));
-    app.get('/', (req, res) => res.render('index', {title: 'Ghoul'}))
+    app.get('/', (req, res) => res.render('index', {title: 'Ironman'}))
 }
 app.get('/moniter', nodeStats)
 

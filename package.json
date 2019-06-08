@@ -1,7 +1,7 @@
 {
-  "name": "iron-man(Backend)",
+  "name": "iron-man (user ms)",
   "version": "1.0.0",
-  "description": "backend server for dhandaHub",
+  "description": "User MS for dhandaHub",
   "main": "node ./bin/www",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,6 +22,7 @@
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.2.17",
     "morgan": "^1.9.1",
+    "mqtt": "^3.0.0",
     "redis": "^2.8.0",
     "serve-favicon": "^2.5.0",
     "winston": "^2.4.0"

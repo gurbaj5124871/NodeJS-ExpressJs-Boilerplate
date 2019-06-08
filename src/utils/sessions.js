@@ -1,3 +1,5 @@
+'use strict'
+
 const {redis, redisKeys}            = require('./redis'),
     ObjectId                        = require('./mongo').getObjectId,                   
     constants                       = require('./constants');

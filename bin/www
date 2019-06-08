@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const app   = require('../app'),
-    debug   = require('debug')('ghoul:server'),
+    debug   = require('debug')('ironman:server'),
     http    = require('http'),
-    config  = require('../app-config'),
+    config  = require('../config'),
     logger  = require('../src/utils/logger');
 
 /**

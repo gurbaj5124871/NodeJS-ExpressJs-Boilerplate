@@ -1,3 +1,5 @@
+'use strict'
+
 const mongo                         = require('../../utils/mongo'),
     ServiceProvider                 = require('./service-provider-model'),
     serviceProviderServices         = require('./service-providers-services'),
@@ -14,6 +16,7 @@ const createServiceProviderByAdmin  = async (req, res, next) => {
         serviceProvider.isPhoneVerified = true
         serviceProvider.isAdminVerified = true
         delete serviceProvider.password
+        // create chat channel of service provider
         res.send(serviceProvider)
         // send mail/sms to service provider regarding their login creds
     } catch (err) {
@@ -146,25 +149,25 @@ const updateServiceProviderById     = async (req, res, next) => {
     }
 }
 
-const updateBusinessSubTypes        = async (req, res, next) => {
-    try {
-        const serviceProviderId     = req.params.serviceProvider
-        const businessSubTypes      = [...new Set(req.body.businessSubTypes)]
-        const updateType            = req.body.updateType
-        serviceProviderServices.updateServiceProviderPermissionCheck(req.user, serviceProviderId)
-        switch(updateType)          {
-            case 1                  : await serviceProviderServices.addBusinessSubTypes(businessSubTypes)
-                break
-            case 2                  : await serviceProviderServices.replaceBusinessSubTypes(businessSubTypes)
-                break
-        }
-        res.send({success: true})
-        if(req.user.userId === serviceProviderId)
-            serviceProviderServices.updateSPLastActivity(serviceProviderId)
-    } catch (err) {
-        next(err)
-    }
-}
+// const updateBusinessSubTypes        = async (req, res, next) => {
+//     try {
+//         const serviceProviderId     = req.params.serviceProvider
+//         const businessSubTypes      = [...new Set(req.body.businessSubTypes)]
+//         const updateType            = req.body.updateType
+//         serviceProviderServices.updateServiceProviderPermissionCheck(req.user, serviceProviderId)
+//         switch(updateType)          {
+//             case 1                  : await serviceProviderServices.addBusinessSubTypes(businessSubTypes)
+//                 break
+//             case 2                  : await serviceProviderServices.replaceBusinessSubTypes(businessSubTypes)
+//                 break
+//         }
+//         res.send({success: true})
+//         if(req.user.userId === serviceProviderId)
+//             serviceProviderServices.updateSPLastActivity(serviceProviderId)
+//     } catch (err) {
+//         next(err)
+//     }
+// }
 
 module.exports                      = {
     createServiceProviderByAdmin,
@@ -175,5 +178,5 @@ module.exports                      = {
     getServiceProviderById,
     getServiceProviderByHandle,
     updateServiceProviderById,
-    updateBusinessSubTypes
+    //updateBusinessSubTypes
 }

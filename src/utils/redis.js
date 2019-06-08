@@ -1,3 +1,5 @@
+'use strict'
+
 const redis                 = require('../../bootstrap/redis').redisClient;
 
 const redisKeys             = Object.freeze({

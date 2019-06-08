@@ -1,5 +1,8 @@
+'use strict'
+
 const mongo                         = require('../../utils/mongo'),
     Customer                        = require('./customer-model'),
+    CustomerMqtt                    = require('./customer-mqtt-model'),
     customerServices                = require('./customers-services'),
     errify                          = require('../../utils/errify'),
     errMsg                          = require('../../utils/error-messages');

@@ -1,3 +1,5 @@
+'use strict'
+
 const mongoose              = require('mongoose'),
       constants             = require('../../utils/constants');
 

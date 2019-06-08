@@ -1,3 +1,5 @@
+'use strict'
+
 const logger                = require('./logger'),
     errMsg                  = require('./error-messages'),
     {isCelebrate}           = require('celebrate');
@@ -16,7 +18,7 @@ const errorhandlerMiddleware= (err, req, res, next) => {
     res.status(err.statusCode || 500).send({error: err})
 }
 
-const createError       = (error, msg, statusCode, errCode) => {
+const createError           = (error, msg, statusCode, errCode) => {
     const err = {
         error: error || 'Internal Server Error',
         message: msg || 'An internal server error occured',

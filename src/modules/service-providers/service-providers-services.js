@@ -1,3 +1,5 @@
+'use strict'
+
 const ServiceProvider               = require('./service-provider-model'),
     businessTypesServices           = require('../business-types/business-types-services'),
     businessSubTypesServices        = require('../business-subtypes/business-subtypes-services'),

@@ -1,3 +1,5 @@
+'use strict'
+
 const AccessControl = require('accesscontrol'),
     constants       = require('../utils/constants'),
     resource        = constants.resource;

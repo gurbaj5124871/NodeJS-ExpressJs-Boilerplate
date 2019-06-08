@@ -1,7 +1,9 @@
+'use strict'
+
 const Promise           = require('bluebird'),
     redis               = require('redis'),
     logger              = require('../src/utils/logger'),
-    config              = require('../app-config');
+    config              = require('../config');
 
 Promise.promisifyAll(redis.RedisClient.prototype)
 Promise.promisifyAll(redis.Multi.prototype)

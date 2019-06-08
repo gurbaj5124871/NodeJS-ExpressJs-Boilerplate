@@ -1,3 +1,5 @@
+'use strict'
+
 const Customer                  = require('./customer-model'),
     {redis, redisKeys}          = require('../../utils/redis'),
     constants                   = require('../../utils/constants'),

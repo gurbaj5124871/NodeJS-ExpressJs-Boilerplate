@@ -27,11 +27,6 @@ async function getStats(req, res, next) {
     }
 }
 
-/**
- * get rough process cpu utilization over the given time period
- * @param {Number} timePeriod - in microseconds
- * @return {Promise}
- */
 function getCpuUtilisationPercent(timePeriod) {
     return new Promise((resolve, reject) => {
         const startTime = process.hrtime();

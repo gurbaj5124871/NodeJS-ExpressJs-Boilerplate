@@ -1,3 +1,5 @@
+'use strict'
+
 const admin             = require('./admin')
 const serviceProviders  = require('./service-providers')
 const businessTypes     = require('./business-types')
