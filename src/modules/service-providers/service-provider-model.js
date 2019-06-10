@@ -46,8 +46,8 @@ const serviceProviderSchema = mongoose.Schema({
     isDeleted               : {type: Boolean, index: true},
     isEmailVerified         : {type: Boolean, default: false, index: true},
     isPhoneVerified         : {type: Boolean, default: false, required: true, index: true},
-    emailVerificationToken  : String,
-    phoneVerificationToken  : Number, // OTP
+    // emailVerificationToken  : String,
+    // phoneVerificationToken  : Number, // OTP
 
     lastActivityAt          : Date
 }, {timestamps: true, read: 'primaryPreferred', useNestedStrict: true});

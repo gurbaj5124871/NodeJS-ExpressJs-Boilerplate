@@ -15,7 +15,7 @@ accessControl
     .readAny(resource.businessTypes)
     .readAny(resource.businessSubTypes)
     .readAny(resource.serviceProvider, [
-        '*', '!password', '!isAdminVerified', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!noOfCustomersFollowing',
+        '*', '!password', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!noOfCustomersFollowing',
         '!isEmailVerified', '!isPhoneVerified', '!emailVerificationToken', '!phoneVerificationToken', '!businessModelTypes'
     ])
     .readAny(resource.customer, [
@@ -33,7 +33,7 @@ accessControl
     .readAny(resource.businessSubTypes)
     .create(resource.businessSubTypes)
     .readAny(resource.serviceProvider, [
-        '*', '!password', '!isAdminVerified', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!businessSubTypes',
+        '*', '!password', '!isBlocked', '!isDeleted', '!lastActivityAt', '!ownershipType', '!businessSubTypes',
         '!isEmailVerified', '!isPhoneVerified', '!emailVerificationToken', '!phoneVerificationToken', '!businessModelTypes', '!noOfCustomersFollowing'
     ])
     .readOwn(resource.serviceProvider, ['*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!lastActivityAt'])

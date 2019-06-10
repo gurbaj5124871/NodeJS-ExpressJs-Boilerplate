@@ -10,6 +10,7 @@ const ServiceProvider               = require('./service-provider-model'),
     errify                          = require('../../utils/errify'),
     errMsg                          = require('../../utils/error-messages'),
     mongo                           = require('../../utils/mongo'),
+    {redis, redisKeys}              = require('../../utils/redis'),
     authentication                  = require('../../utils/authentication'),
     sessions                        = require('../../utils/sessions'),
     accessControl                   = require('../../utils/authorization').accessControl,
@@ -94,45 +95,45 @@ function getServiceProvider(criteria, projections = {}) {
     projections     = {lastActivityAt: 0, emailVerificationToken: 0, phoneVerificationToken: 0, __v: 0}
     const pipeline  = [{$match: criteria}, {$project: projections}]
     if(projections.businessType)
-        pipeline.push([
+        pipeline.push(
             {$lookup: {from: 'businesstypes', localField: 'businessType', foreignField: '_id', as: 'businessType'}},
             {$unwind: '$businessType'},
             {$addFields: {businessType: {
                 name: '$businessType.name', businessTerm: '$businessType.businessTerm',
                 customerTerm: '$businessType.customerTerm', imageUrl: '$businessType.imageUrl'
             }}}
-        ])
+        )
     if(projections.businessSubTypes)
-        pipeline.push([
+        pipeline.push(
             {$lookup: {from: 'businesssubtypes', localField: 'businessSubTypes', foreignField: '_id', as: 'businesssubtypes'}},
             {$addFields: {businessSubTypes: {$map: {input: '$businessSubTypes', as: 'bst', in: {
                 name: '$$bst.name', businessTerm: '$$bst.businessTerm', customerTerm: '$$bst.customerTerm', imageUrl: '$$bst.imageUrl'
             }}}}}
-        ])
+        )
     return mongo.aggregate(ServiceProvider, pipeline)
 }
 
 const getServiceProviderByEmailOrPhoneNumber = async (email, phoneNumber) => {
     const criteria                  = email ? {email} : {phoneNumber};
-    const serviceProvider           = await getServiceProvider(criteria)
+    const serviceProvider           = await getServiceProvider(Object.assign(criteria, {isDeleted: {$ne: true}}))
     return serviceProvider.length ? serviceProvider[0] : null
 }
 
 const getServiceProviderById        = async (_id, projections) => {
-    const serviceProvider           = await getServiceProvider({_id, isDeleted: false}, projections)
+    const serviceProvider           = await getServiceProvider({_id: mongo.getObjectId(_id), isDeleted: {$ne: true}}, projections)
     return serviceProvider.length ? serviceProvider[0] : null
 }
 
 const verificationCheckServiceProvider = sp => {
-    if(sp.isEmailVerified === false && sp.isPhoneVerified === false)
-        throw errify.unauthorized(errMsg['1007'], 1007)
-    if(sp.isEmailVerified === false)
-        throw errify.unauthorized(errMsg['1005'], 1005)
+    // if(sp.isEmailVerified === false && sp.isPhoneVerified === false)
+    //     throw errify.unauthorized(errMsg['1007'], 1007)
+    // if(sp.isEmailVerified === false)
+    //     throw errify.unauthorized(errMsg['1005'], 1005)
     if(sp.isPhoneVerified === false)
         throw errify.unauthorized(errMsg['1006'], 1006)
     if(sp.isAdminVerified === false)
         throw errify.unauthorized(errMsg['1012'], 1012)
-    if(sp.isBloecked === false)
+    if(sp.isBlocked === true)
         throw errify.unauthorized(errMsg['1013'], 1013)
 }
 
@@ -159,7 +160,16 @@ const updateServiceProvider         = async (spId , data) => {
         if(handleExistanceCheck(data.handle))
             throw errify.badData(errMsg['1015'], 1015)
     }
-    return ServiceProvider.findOneAndUpdate({_id: spId}, {$set: data}, {lean: true, new: true})
+    return ServiceProvider.findOneAndUpdate({_id: spId}, {$set: data}, {lean: true, new: true, useFindAndModify: false})
+}
+
+const cacheSpBasicDetails           = serviceProvider => {
+    const userRedisKey              = redisKeys.user(serviceProvider._id)
+    const basicDetails              = JSON.stringify({
+        _id: serviceProvider._id, handle: serviceProvider.handle, userType: constants.userRoles.serviceProvider,
+        name: serviceProvider.name, imageUrl: serviceProvider.imageUrl
+    })
+    return redis.setexAsync(userRedisKey, universalFunc.convertDaysToSeconds(30), basicDetails)
 }
 
 const addBusinessSubTypes           = async (spId, businessSubTypes) => {
@@ -176,25 +186,25 @@ const replaceBusinessSubTypes       = async (spId, businessSubTypes) => {
         return ServiceProvider.updateOne({_id: spId}, {$set: {businessSubTypes}})
 }
 
-const sendEmailVerificationMail     = async (spId, email) => {
-    try {
-        const emailVerificationToken= randomNumber()
-        const update = await mongo.updateOne(ServiceProvider, {_id: spId, email, isEmailVerified: false}, {$set: {emailVerificationToken}})
-        // send email to the service provider
-    } catch (err) {
-        logger.warn({message: `Error while sending verification mail to ${email}`, err})
-    }
-}
+// const sendEmailVerificationMail     = async (spId, email) => {
+//     try {
+//         const emailVerificationToken= randomNumber()
+//         const update = await mongo.updateOne(ServiceProvider, {_id: spId, email, isEmailVerified: false}, {$set: {emailVerificationToken}})
+//         // send email to the service provider
+//     } catch (err) {
+//         logger.warn({message: `Error while sending verification mail to ${email}`, err})
+//     }
+// }
 
-const sendPhoneVerificationOTP      = async (spId, extention, phoneNumber) => {
-    try {
-        const phoneVerificationToken= randomNumber()
-        const update = await mongo.updateOne(ServiceProvider, {_id: spId, phoneNumber, isEmailVerified: false}, {$set: {phoneVerificationToken}})
-        // send sms to the service provider
-    } catch (err) {
-        logger.warn({message: `Error while sending verification sms to ${phoneNumber}`, err})
-    }
-}
+// const sendPhoneVerificationOTP      = async (spId, extention, phoneNumber) => {
+//     try {
+//         const phoneVerificationToken= randomNumber()
+//         const update = await mongo.updateOne(ServiceProvider, {_id: spId, phoneNumber, isEmailVerified: false}, {$set: {phoneVerificationToken}})
+//         // send sms to the service provider
+//     } catch (err) {
+//         logger.warn({message: `Error while sending verification sms to ${phoneNumber}`, err})
+//     }
+// }
 
 const comparePassword               = (inputPass, dbPass) => bcrypt.comparePassword(inputPass, dbPass)
 
@@ -203,7 +213,7 @@ const createSession                 = async (userId, roles, platform, deviceToke
     return authentication.generateToken(userId, sessionId, constants.userRoles.serviceProvider, roles, platform)
 }
 
-const expireSession                 = (userId, sessionId) => sessions.expireSessionFromToken({userId, sessionId, role: constants.userRoles.serviceProvider})
+const expireSession                 = (userId, sessionId) => sessions.expireSessionFromToken({payload: {userId, sessionId, role: constants.userRoles.serviceProvider}})
 
 const updateSPLastActivity          = _id => {
     try {
@@ -228,10 +238,10 @@ const getServiceProvicerAttributesPermission = (requestSP, spId) => {
 }
 
 const updateServiceProviderPermissionCheck = (requestUser, spId) => {
-    if(accessControl.can(requestUser.roles).updadeAny(resource.serviceProvider))
+    if(accessControl.can(requestUser.roles).updateAny(resource.serviceProvider))
         return true
     if(requestUser.userId !== spId)
-        throw errify.badRequest()
+        throw errify.badRequest(errify.unauthorized(errMsg['1000'], 1000))
 }
 
 module.exports = {
@@ -242,10 +252,11 @@ module.exports = {
     verificationCheckServiceProvider,
     verifyServiceProvider,
     updateServiceProvider,
+    cacheSpBasicDetails,
     replaceBusinessSubTypes,
     addBusinessSubTypes,
-    sendEmailVerificationMail,
-    sendPhoneVerificationOTP,
+    // sendEmailVerificationMail,
+    // sendPhoneVerificationOTP,
     comparePassword,
     createSession,
     expireSession,

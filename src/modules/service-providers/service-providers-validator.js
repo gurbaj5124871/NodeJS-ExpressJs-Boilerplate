@@ -26,10 +26,10 @@ const signup                = celebrate({
             }).required()
         }).required(),
         businessType        : Joi.string().required().regex(mongoIdRegex),
-        // businessModelTypes  : Joi.array().items(
-        //     Joi.number().integer().valid(Object.values(constants.businessModelTypes))
-        // ).required().min(1).max(Object.keys(constants.businessModelTypes).length),
-        // ownershipType       : Joi.number().integer().valid(Object.values(constants.businessOwnershipTypes)).required()
+        businessModelTypes  : Joi.array().items(
+            Joi.number().integer().valid(Object.values(constants.businessModelTypes))
+        ).min(1).max(Object.keys(constants.businessModelTypes).length),
+        ownershipType       : Joi.number().integer().valid(Object.values(constants.businessOwnershipTypes))
     })
 })
 
@@ -46,15 +46,16 @@ const getAllServiceProviders= celebrate({
         limit               : Joi.number().integer().default(50),
         lastServiceProviderId:Joi.string().regex(mongoIdRegex),
         isAdminVerified     : Joi.boolean(),
-        // 1 = createdOn desc, 2 = createdOn asce
-        sort                : Joi.number().integer().valid([1, 2]).default(1),
+        isBlocked           : Joi.boolean(),
+        // -1 = createdAt desc, 1 = createdAt asce
+        sort                : Joi.number().integer().valid([-1, 1]).default(-1),
         search              : Joi.string()
     })
 })
 
 const getServiceProviderById= celebrate({
     params                  : Joi.object().keys({
-        serviceProvider     : Joi.string().required().regex(mongoIdRegex)
+        serviceProviderId   : Joi.string().required().regex(mongoIdRegex)
     })
 })
 
@@ -66,7 +67,7 @@ const getServiceProviderByHandle = celebrate({
 
 const updateServiceProviderById = celebrate({
     params                  : Joi.object().keys({
-        serviceProvider     : Joi.string().required().regex(mongoIdRegex)
+        serviceProviderId   : Joi.string().required().regex(mongoIdRegex)
     }),
     body                    : Joi.object().keys({
         name                : Joi.string(),
@@ -93,7 +94,7 @@ const updateServiceProviderById = celebrate({
 
 const updateBusinessSubTypes= celebrate({
     params                  : Joi.object().keys({
-        serviceProvider     : Joi.string().required().regex(mongoIdRegex)
+        serviceProviderId   : Joi.string().required().regex(mongoIdRegex)
     }),
     body                    : Joi.object().keys({
         updateType          : Joi.number().integer().valid([1, 2]).default(1), // 1 = add to the set, 2 = replace whole array

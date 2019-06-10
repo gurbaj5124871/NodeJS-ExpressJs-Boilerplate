@@ -3,13 +3,15 @@
 const mongo                         = require('../../utils/mongo'),
     ServiceProvider                 = require('./service-provider-model'),
     serviceProviderServices         = require('./service-providers-services'),
+    constants                       = require('../../utils/constants'),
     errify                          = require('../../utils/errify'),
     errMsg                          = require('../../utils/error-messages');
 
 const createServiceProviderByAdmin  = async (req, res, next) => {
     try {
         const body                  = req.body;
-        const serviceProvider       = await serviceProviderServices.createServiceProvider(body)
+        const serviceProvider       = (await serviceProviderServices.createServiceProvider(body)).toJSON()
+        await serviceProviderServices.cacheSpBasicDetails(serviceProvider)
         await serviceProviderServices.verifyServiceProvider(serviceProvider._id, true, true)
         if(serviceProvider.email)
         serviceProvider.isEmailVerified = true
@@ -27,11 +29,12 @@ const createServiceProviderByAdmin  = async (req, res, next) => {
 const signup                        = async (req, res, next) => {
     try {
         const body                  = req.body;
-        const serviceProvider       = (await serviceProviderServices.createServiceProvider(body)).toJSON()        
-        await Promise.all([
-            serviceProviderServices.sendEmailVerificationMail(serviceProvider._id, body.email),
-            serviceProviderServices.sendPhoneVerificationOTP(serviceProvider._id, body.extention, body.phoneNumber)
-        ])
+        const serviceProvider       = (await serviceProviderServices.createServiceProvider(body)).toJSON()
+        await serviceProviderServices.cacheSpBasicDetails(serviceProvider)
+        // await Promise.all([
+        //     serviceProviderServices.sendEmailVerificationMail(serviceProvider._id, body.email),
+        //     serviceProviderServices.sendPhoneVerificationOTP(serviceProvider._id, body.extention, body.phoneNumber)
+        // ])
         delete serviceProvider.password
         res.send(serviceProvider)
         serviceProviderServices.updateSPLastActivity(serviceProvider._id)
@@ -75,25 +78,29 @@ const getAllServiceProviders        = async (req, res, next) => {
         let criteria                = {}
         if(query.hasOwnProperty('isAdminVerified'))
             criteria                = {isAdminVerified: query.isAdminVerified}
+        if(query.hasOwnProperty('isBlocked'))
+            criteria.isBlocked      = query.isBlocked
         const sort                  = (sort => {
             switch(sort)            {
-                case 1              : if(lastServiceProviderId)
-                                        criteria = Object.assign(criteria, {_id: {$gt: lastServiceProviderId}})
+                case -1              : if(lastServiceProviderId)
+                                        criteria = Object.assign(criteria, {_id: {$lte: lastServiceProviderId}})
                                     return {createdOn: -1}
-                case 2              : if(lastServiceProviderId)
-                                        criteria = Object.assign(criteria, {_id: {$gt: lastServiceProviderId}})
+                case 1              : if(lastServiceProviderId)
+                                        criteria = Object.assign(criteria, {_id: {$gte: lastServiceProviderId}})
                                     return {createdOn: 1}
             }
         })(query.sort);
         if(query.search)
-            criteria                = Object.assign(criteria, {name: {$regex: query.search}})
+            criteria                = Object.assign(criteria, {name: {$regex: query.search, $options: 'i'}})
         const serviceProviders      = await ServiceProvider.find(criteria, {__v: 0}).limit(limit+1).sort(sort).lean()
         let next                    = 'false'
         if(serviceProviders.length  > limit) {
+            next                    = `?limit=${limit}&lastServiceProviderId=${serviceProviders[serviceProviders.length-1]._id}&sort=${query.sort}`
             serviceProviders.pop()
-            next                    = `?lastServiceProviderId=${serviceProviders[serviceProviders.length-1]._id}&sort=${query.sort}`
             if(query.hasOwnProperty('isAdminVerified'))
                 next                += `&isAdminVerified=${query.isAdminVerified}`
+            if(query.hasOwnProperty('isBlocked'))
+                next                += `&isBlocked=${query.isBlocked}`
             if(query.search)
                 next                += `&search=${query.search}`
         }
@@ -108,15 +115,19 @@ const getAllServiceProviders        = async (req, res, next) => {
 
 const getServiceProviderById        = async (req, res, next) => {
     try {
-        const permissions           = serviceProviderServices.getServiceProvicerAttributesPermission(req.user, req.params.serviceProvider)
+        const serviceProviderId     = req.params.serviceProviderId;
+        const permissions           = serviceProviderServices.getServiceProvicerAttributesPermission(req.user, serviceProviderId)
         const projections           = permissions.filter({
             email: 1, phoneNumber: 1, extention: 1, name: 1, handle: 1, imageUrl: 1, description: 1, googleLocation: 1,
             socialMediaLinks: 1, roles: 1, businessType: 1, businessSubTypes: 1, businessModelTypes: 1, ownershipType: 1,
             noOfCustomersFollowing: 1, isAdminVerified: 1, isBlocked: 1, isDeleted: 1, isEmailVerified: 1, isPhoneVerified: 1,
             lastActivityAt: 1
         })
-        const serviceProvider       = await serviceProviderServices.getServiceProviderById(req.params.serviceProvider, projections)
-        return res.send(serviceProvider || {})
+        const serviceProvider       = await serviceProviderServices.getServiceProviderById(serviceProviderId, projections)
+        const accessCondition       = serviceProvider.isAdminVerified === false && (req.user === undefined || (req.user.userId !== serviceProviderId && req.user.role !== constants.userRoles.admin))
+        if(serviceProvider === null || accessCondition)
+            return next(errify.badRequest(errMsg['1017'], 1017))
+        return res.send(serviceProvider)
     } catch(err) {
         next(err)   
     }
@@ -125,9 +136,9 @@ const getServiceProviderById        = async (req, res, next) => {
 const getServiceProviderByHandle    = async (req, res, next) => {
     try {
         const handle                = req.params.handle;
-        const serviceProvider       = await ServiceProvider.findOne({handle}, {_id: 1}, {lean: true})
+        const serviceProvider       = await ServiceProvider.findOne({handle, isDeleted: {$ne: true}}, {_id: 1}, {lean: true})
         if(serviceProvider)         {
-            req.params.serviceProvider = serviceProvider._id
+            req.params.serviceProviderId = serviceProvider._id
             return getServiceProviderById(req, res, next)
         } else throw errify.badData(errMsg['1014'], 1014)
     } catch (err) {
@@ -137,13 +148,16 @@ const getServiceProviderByHandle    = async (req, res, next) => {
 
 const updateServiceProviderById     = async (req, res, next) => {
     try {
-        const serviceProviderId     = req.params.serviceProvider;
+        const serviceProviderId     = req.params.serviceProviderId;
         const body                  = req.body
         serviceProviderServices.updateServiceProviderPermissionCheck(req.user, serviceProviderId)
         const serviceProvider       = await serviceProviderServices.updateServiceProvider(serviceProviderId, body)
-        res.send(serviceProvider)
-        if(req.user.userId === serviceProviderId)
-            serviceProviderServices.updateSPLastActivity(serviceProviderId)
+        if(serviceProvider)         {
+            await serviceProviderServices.cacheSpBasicDetails(serviceProvider)
+            res.send(serviceProvider)
+            if(req.user.userId === serviceProviderId)
+                serviceProviderServices.updateSPLastActivity(serviceProviderId)
+        } else res.send({})
     } catch (err) {
         next(err)
     }

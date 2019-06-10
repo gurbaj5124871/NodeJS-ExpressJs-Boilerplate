@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Gurbaj",
+  "private": true,
   "license": "ISC",
   "dependencies": {
     "accesscontrol": "^2.2.1",
