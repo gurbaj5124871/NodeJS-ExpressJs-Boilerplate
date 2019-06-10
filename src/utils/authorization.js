@@ -1,13 +1,13 @@
 'use strict'
 
 const AccessControl = require('accesscontrol'),
-    constants       = require('../utils/constants'),
+    constants       = require('./constants'),
+    errify          = require('./errify'),
+    errMsg          = require('./error-messages'),
     resource        = constants.resource;
-let role            = {};
 
+const role          = Object.keys(constants.accessRoles).reduce((res, obj) => Object.assign(res, constants.accessRoles[obj]), {});
 const accessControl = new AccessControl()
-for(let key in constants.accessRoles)
-    role = Object.assign(role, constants.accessRoles[key])
 
 // Customer Specific
 accessControl
@@ -20,7 +20,7 @@ accessControl
     ])
     .readAny(resource.customer, [
         '*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId','!dob', '!lastActivityAt',
-        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender'
+        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender', '!isSignupComplete'
     ])
     .readOwn(resource.customer, ['*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!lastActivityAt'])
     .updateOwn(resource.customer)
@@ -39,7 +39,7 @@ accessControl
     .readOwn(resource.serviceProvider, ['*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!lastActivityAt'])
     .readAny(resource.customer, [
         '*', '!password', '!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId','!dob', '!lastActivityAt',
-        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender'
+        '!googleLocation', '!noOfBusinessesFollowed', '!isBlocked', '!isDeleted', '!isEmailVerified', '!isPhoneVerified', '!gender', '!isSignupComplete'
     ])
     .updateOwn(resource.serviceProvider)
 
@@ -55,10 +55,10 @@ accessControl
     .updateAny(resource.businessSubTypes)
     .create(resource.serviceProvider)
     .create(resource.customer)
-    .readAny(resource.serviceProvider, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
-    .readAny(resource.customer, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
-    .readAny(resource.allServiceProviders, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
-    .readAny(resource.allCustomers, ['!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.serviceProvider, ['*', '!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.customer, ['*', '!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.allServiceProviders, ['*', '!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
+    .readAny(resource.allCustomers, ['*', '!password','!emailVerificationToken', '!phoneVerificationToken', '!facebookId', '!googleId'])
     .updateAny(resource.serviceProvider)
     .updateAny(resource.customer)
 
@@ -69,7 +69,7 @@ const accessAllowed = (actionName, resource) => {
             if (permission.granted === true)
                 next()
             else
-                next(new Error())
+                next(errify.unauthorized(errMsg['1000'], 1000))
         } catch (err) {
             next(err)
         }

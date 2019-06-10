@@ -68,7 +68,11 @@ const insertManyWithPopulate = async (model, arrayToSave, populateOptions) => {
     })
 }
 
-const getObjectId   = () => mongoose.Types.ObjectId()
+const getObjectId   = (id = null) => {
+    if(id)
+        return mongoose.Types.ObjectId(id)
+    return mongoose.Types.ObjectId()
+}
 
 module.exports      = {
     createOne,

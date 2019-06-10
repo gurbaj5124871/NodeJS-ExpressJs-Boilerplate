@@ -29,6 +29,7 @@ const customerSchema        = mongoose.Schema({
 
     firstName               : {type: String, trim: true},
     lastName                : {type: String, trim: true},
+    imageUrl                : String,
     bio                     : String,
     gender                  : String,
     dob                     : Date,
@@ -38,6 +39,7 @@ const customerSchema        = mongoose.Schema({
     roles                   : [String],
     noOfBusinessesFollowed  : {type: Number, default: 0},
 
+    isSignupComplete        : {type: Boolean, index: true},
     isBlocked               : {type: Boolean, default: false, index: true},
     isDeleted               : {type: Boolean, index: true},
     isEmailVerified         : {type: Boolean, default: false, index: true},
