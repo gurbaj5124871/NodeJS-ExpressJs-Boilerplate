@@ -16,5 +16,6 @@ module.exports  = Object.freeze({
   '1014'        : `Service Provider not found`,
   '1015'        : `Handle is already Taken`,
   '1016'        : `Invalid OTP`,
-  '1017'        : `User Not Found`
+  '1017'        : `User Not Found`,
+  '1018'        : `Token Expired`
 })

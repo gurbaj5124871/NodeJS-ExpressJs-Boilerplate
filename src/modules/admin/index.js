@@ -11,6 +11,14 @@ const express       = require('express'),
 
 router.post('/login', validator.login, controller.login)
 
-router.post('/', authentication.verifyToken, accessAllowed('create', resource.admin), validator.createAdmin, controller.createAdmin)
+router.post('/', authentication.verifyAdminToken, accessAllowed('create', resource.admin), validator.createAdmin, controller.createAdmin)
+
+router.post('/logout', authentication.verifyAdminToken, controller.logout)
+
+// Regarding Service Providers
+router.patch('/serviceProviders/:serviceProviderId', authentication.verifyAdminToken, validator.updateServiceProvider, controller.updateServiceProvider)
+
+// Regarding Customers
+router.patch('/customers/:customerId', authentication.verifyAdminToken, validator.updateCustomer, controller.updateCustomer)
 
 module.exports      = router

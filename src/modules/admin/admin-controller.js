@@ -7,6 +7,7 @@ const mongo                     = require('../../utils/mongo'),
     constants                   = require('../../utils/constants'),
     errify                      = require('../../utils/errify'),
     errMsg                      = require('../../utils/error-messages'),
+    adminServices               = require('./admin-services'),
     Admin                       = require('./admin-model');
 
 const login                     = async (req, res, next) => {
@@ -40,7 +41,52 @@ const createAdmin               = async (req, res, next) => {
     }
 }
 
+const logout                    = async (req, res, next) => {
+    try {
+        const {userId, sessionId}= req.user;
+        await sessions.expireSessionFromToken({payload: {userId, sessionId, role: constants.userRoles.admin}})
+        res.send({success: true})
+    } catch (err) {
+        next(err)
+    }
+}
+
+const updateServiceProvider     = async (req, res, next) => {
+    try {
+        const serviceProviderId = req.params.serviceProviderId, body = req.body;
+        switch(true)            {
+            case body.isAdminVerified               : await adminServices.verifyServiceProvider(serviceProviderId)
+                break
+            case body.hasOwnProperty('isBlocked')   : await adminServices.changeSpBlockStatus(serviceProviderId, body.isBlocked)
+                break
+            case body.hasOwnProperty('isDeleted')   : await adminServices.deleteServiceProvider(serviceProviderId)
+                break
+        }
+        return res.send({success: 'true'})
+    } catch (err) {
+        next(err)
+    }
+}
+
+const updateCustomer            = async (req, res, next) => {
+    try {
+        const customerId        = req.params.customerId, body = req.body;
+        switch(true)            {
+            case body.hasOwnProperty('isBlocked')   : await adminServices.changeCpBlockStatus(customerId, body.isBlocked)
+                break
+            case body.hasOwnProperty('isDeleted')   : await adminServices.deleteCustomer(customerId)
+                break
+        }
+        return res.send({success: 'true'})
+    } catch (err) {
+        next(err)
+    }
+}
+
 module.exports                  = {
     login,
-    createAdmin
+    createAdmin,
+    logout,
+    updateServiceProvider,
+    updateCustomer
 }

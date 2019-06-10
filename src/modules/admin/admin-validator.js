@@ -19,7 +19,24 @@ const createAdmin           = celebrate({
     })
 })
 
+const updateServiceProvider = celebrate({
+    body                    : Joi.object().keys({
+        isAdminVerified     : Joi.boolean().valid(true),
+        isBlocked           : Joi.boolean(),
+        isDeleted           : Joi.boolean().valid(true)
+    }).xor('isAdminVerified', 'isBlocked', 'isDeleted')
+})
+
+const updateCustomer        = celebrate({
+    body                    : Joi.object().keys({
+        isBlocked           : Joi.boolean(),
+        isDeleted           : Joi.boolean().valid(true)
+    }).xor('isBlocked', 'isDeleted')
+})
+
 module.exports              = {
     login,
-    createAdmin
+    createAdmin,
+    updateServiceProvider,
+    updateCustomer
 }
