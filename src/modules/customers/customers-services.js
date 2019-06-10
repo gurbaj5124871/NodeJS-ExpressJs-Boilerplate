@@ -87,6 +87,17 @@ const getCustomerById           = async (_id, projections) => {
     return customer.length ? customer[0] : null
 }
 
+const verificationCheckCustomer = customer => {
+    // if(customer.isEmailVerified === false && customer.isPhoneVerified === false)
+    //     throw errify.unauthorized(errMsg['1007'], 1007)
+    // if(customer.isEmailVerified === false)
+    //     throw errify.unauthorized(errMsg['1005'], 1005)
+    // if(customer.isPhoneVerified === false)
+    //     throw errify.unauthorized(errMsg['1006'], 1006)
+    if(customer.isBlocked === true)
+        throw errify.unauthorized(errMsg['1013'], 1013)
+}
+
 const createSession             = async (userId, roles, platform, deviceToken, appVersion) => {
     const sessionId             = await sessions.createSession(userId, constants.userRoles.customer, roles, platform, deviceToken, appVersion)
     return authentication.generateToken(userId, sessionId, constants.userRoles.customer, roles, platform)
@@ -130,6 +141,7 @@ module.exports                  = {
     cacheCpBasicDetails,
     getCustomerByPhoneNumber,
     getCustomerById,
+    verificationCheckCustomer,
     createSession,
     expireSession,
     updateCPLastActivity,

@@ -74,6 +74,7 @@ const loginViaPhone                 = async (req, res, next) => {
         const customer              = await customerServices.getCustomerByPhoneNumber(phoneNumber)
         if(!customer)
             throw errify.badRequest(errMsg['1017'], 1017)
+        customerServices.verificationCheckCustomer(customer)
         customer.authorization      = await customerServices.createSession(customer._id, customer.roles, platform, deviceToken, appVersion)
         res.send(customer)
         customerServices.updateCPLastActivity(customer._id)
