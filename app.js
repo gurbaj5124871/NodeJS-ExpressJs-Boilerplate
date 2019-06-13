@@ -58,6 +58,7 @@ app.use(errify.errorhandlerMiddleware);
 (async () => {
     await require('./bootstrap/mongo')()
     await require('./bootstrap/redis')
+    await require('./src/ms-inter-comm')
 })();
 
 process.on('uncaughtException', err => {

@@ -4,6 +4,7 @@ const mongo                         = require('../../utils/mongo'),
     ServiceProvider                 = require('./service-provider-model'),
     serviceProviderServices         = require('./service-providers-services'),
     constants                       = require('../../utils/constants'),
+    msInterComm                     = require('../../ms-inter-comm'),
     errify                          = require('../../utils/errify'),
     errMsg                          = require('../../utils/error-messages');
 
@@ -19,6 +20,7 @@ const createServiceProviderByAdmin  = async (req, res, next) => {
         serviceProvider.isAdminVerified = true
         delete serviceProvider.password
         // create chat channel of service provider
+        await msInterComm.sendSpAdminApproval(serviceProvider._id, serviceProvider.name)
         res.send(serviceProvider)
         // send mail/sms to service provider regarding their login creds
     } catch (err) {

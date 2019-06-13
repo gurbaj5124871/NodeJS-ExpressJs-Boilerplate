@@ -169,7 +169,7 @@ const cacheSpBasicDetails           = serviceProvider => {
         _id: serviceProvider._id, handle: serviceProvider.handle, userType: constants.userRoles.serviceProvider,
         name: serviceProvider.name, imageUrl: serviceProvider.imageUrl
     })
-    return redis.setexAsync(userRedisKey, universalFunc.convertDaysToSeconds(30), basicDetails)
+    return redis.setex(userRedisKey, universalFunc.convertDaysToSeconds(30), basicDetails)
 }
 
 const addBusinessSubTypes           = async (spId, businessSubTypes) => {

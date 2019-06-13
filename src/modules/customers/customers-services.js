@@ -22,13 +22,13 @@ const cpExistanceCheckViaPhone  = async phoneNumber => {
 
 const generatePhoneVerification = phoneNumber => {
     const OTP                   = randomNumber()
-    return redis.setAsync(redisKeys.customerPhoneVerification(phoneNumber), OTP, 'EX', 5 * 60) // valid for 5 min
+    return redis.set(redisKeys.customerPhoneVerification(phoneNumber), OTP, 'EX', 5 * 60) // valid for 5 min
 }
 
-const expirePhoneVerification   = phoneNumber => redis.delAsync(redisKeys.customerPhoneVerification(phoneNumber))
+const expirePhoneVerification   = phoneNumber => redis.del(redisKeys.customerPhoneVerification(phoneNumber))
 
 const phoneVerificationCheck    = async (phoneNumber, OTP) => {
-    const match                 = await redis.getAsync(redisKeys.customerPhoneVerification(phoneNumber))
+    const match                 = await redis.get(redisKeys.customerPhoneVerification(phoneNumber))
     if(!match || match !== OTP)
         return false
     return true
@@ -60,7 +60,7 @@ const cacheCpBasicDetails       = customer => {
         _id: customer._id, name: `${customer.firstName} ${customer.lastName}`, userType: constants.userRoles.customer,
         firstName: customer.firstName, lastName: customer.lastName, imageUrl: customer.imageUrl
     })
-    return redis.setexAsync(userRedisKey, universalFunc.convertDaysToSeconds(30), basicDetails)
+    return redis.setex(userRedisKey, universalFunc.convertDaysToSeconds(30), basicDetails)
 }
 
 function getCustomer(criteria, projections = {}) {

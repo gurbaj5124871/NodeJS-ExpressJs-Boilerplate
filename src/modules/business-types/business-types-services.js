@@ -9,7 +9,7 @@ const getOrderForBusinessType   = async (order = undefined) => {
     if(order)                   {
         const update            = await mongo.updateMany(BusinessTypes, Object.assign(criteria, {order: {$gte: order}}), {$inc: {order: 1}})
         if(update.nModified > 0)
-            await redis.delAsync(redisKeys.businessTypes)    
+            await redis.del(redisKeys.businessTypes)    
     } else {
         order                   = await redis.zrevrange(redisKeys.businessTypes, 0, 0, 'WITHSCORES')
         if(order.length)
@@ -24,7 +24,7 @@ const getOrderForBusinessType   = async (order = undefined) => {
 
 const createBusinessType        = async businessType => {
     businessType                = await mongo.createOne(BusinessTypes, businessType)
-    await redis.zaddAsync(redisKeys.businessTypes, businessType.order, JSON.stringify(businessType))
+    await redis.zadd(redisKeys.businessTypes, businessType.order, JSON.stringify(businessType))
     return businessType.toJSON()
 }
 
@@ -34,13 +34,13 @@ const getBusinessTypesCache     = async (limit = 10, order = '-inf') => {
         const businessTypes     = await getBusinessTypes()
         if(businessTypes.length === 0)
             return []
-        await redis.zaddAsync(key, businessTypes.reduce((arr, buss) => {
+        await redis.zadd(key, businessTypes.reduce((arr, buss) => {
             arr.push(buss.order, JSON.stringify(buss))
             return arr
         }, []))
     }
     const startRange            = '(' + order
-    const businessTypes         = await redis.zrangebyscoreAsync(key, startRange, '+inf', 'limit', 0, limit +1)
+    const businessTypes         = await redis.zrangebyscore(key, startRange, '+inf', 'limit', 0, limit +1)
     return businessTypes.map(JSON.parse)
 }
 
@@ -59,9 +59,9 @@ const getBusinessTypesCount     = async (includeUnverified = false) => {
     if(includeUnverified)
         return BusinessTypes.countDocuments()
     else {
-        let count               = await redis.zcardAsync(redisKeys.businessTypes)
+        let count               = await redis.zcard(redisKeys.businessTypes)
         if(!count)
-        count                   = BusinessTypes.countDocuments({isVerified: true})
+        count                   = await BusinessTypes.countDocuments({isVerified: true})
         return count
     }
 }
@@ -77,8 +77,8 @@ const paginateBusinessTypes     = (businessTypes, limit) => {
 
 const addBusinessTypeToCache    = async (businessType, order) => {
     const key                   = redisKeys.businessTypes
-    if(await redis.existsAsync(key) !== 0)
-    redis.zaddAsync(key, order, JSON.stringify(businessType))
+    if(await redis.exists(key) !== 0)
+    redis.zadd(key, order, JSON.stringify(businessType))
 }
 
 const removeBusinessTypeFromCache= order => redis.zremrangebyscore(redisKeys.businessTypes, order, order)
