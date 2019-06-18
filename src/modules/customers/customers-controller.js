@@ -2,7 +2,6 @@
 
 const mongo                         = require('../../utils/mongo'),
     Customer                        = require('./customer-model'),
-    CustomerMqtt                    = require('./customer-mqtt-model'),
     customerServices                = require('./customers-services'),
     constants                       = require('../../utils/constants'),
     errify                          = require('../../utils/errify'),
