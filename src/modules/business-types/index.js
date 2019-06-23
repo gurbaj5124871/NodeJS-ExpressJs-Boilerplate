@@ -11,7 +11,7 @@ const express       = require('express'),
 
 router.post('/', authentication.verifyToken, accessAllowed('create', resource.businessTypes), validator.createBusinessType, controller.createBusinessType)
 
-router.get('/', authentication.verifyToken, validator.getBusinessTypes, controller.getBusinessTypes)
+router.get('/', authentication.verifyTokenIfExists, validator.getBusinessTypes, controller.getBusinessTypes)
 
 router.patch('/:businessType', authentication.verifyToken, accessAllowed('updateAny', resource.businessTypes), validator.updateBusinessType, controller.updateBusinessType)
 
