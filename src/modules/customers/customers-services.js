@@ -21,7 +21,7 @@ const cpExistanceCheckViaPhone  = async phoneNumber => {
 }
 
 const generatePhoneVerification = phoneNumber => {
-    const OTP                   = randomNumber()
+    const OTP                   = process.env.NODE_ENV === 'prod' ? randomNumber() : 111111;
     return redis.set(redisKeys.customerPhoneVerification(phoneNumber), OTP, 'EX', 5 * 60) // valid for 5 min
 }
 
