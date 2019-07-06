@@ -17,6 +17,10 @@ router.post('/login', validator.login, controller.login)
 
 router.post('/logout', authentication.verifyToken, controller.logout)
 
+router.patch('/forgotPassword', validator.forgotPassword, controller.forgotPassword)
+
+router.patch('/resetPassword', validator.resetPassword, controller.resetPassword)
+
 // admin api to get all service providers
 router.get('/', authentication.verifyToken, accessAllowed('readAny', resource.allServiceProviders), validator.getAllServiceProviders, controller.getAllServiceProviders)
 

@@ -41,6 +41,21 @@ const login                 = celebrate({
     }).xor('email', 'phoneNumber')
 })
 
+const forgotPassword        = celebrate({
+    body                    : Joi.object().keys({
+        extention           : Joi.string().regex(/^[0-9,+]+$/).trim().min(2).required(),
+        phoneNumber         : Joi.string().regex(/^[0-9]+$/).min(5).required()
+    })
+})
+
+const resetPassword         = celebrate({
+    body                    : Joi.object().keys({
+        phoneNumber         : Joi.string().regex(/^[0-9]+$/).min(5).required(),
+        OTP                 : Joi.number().required().min(100000).max(999999),
+        password            : Joi.string().required()
+    })
+})
+
 const getAllServiceProviders= celebrate({
     query                   : Joi.object().keys({
         limit               : Joi.number().integer().default(50),
@@ -105,6 +120,8 @@ const updateBusinessSubTypes= celebrate({
 module.exports              = {
     signup,
     login,
+    forgotPassword,
+    resetPassword,
     getAllServiceProviders,
     getServiceProviderById,
     getServiceProviderByHandle,

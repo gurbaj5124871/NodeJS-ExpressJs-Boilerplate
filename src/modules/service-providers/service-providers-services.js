@@ -215,6 +215,26 @@ const createSession                 = async (userId, roles, platform, deviceToke
 
 const expireSession                 = (userId, sessionId) => sessions.expireSessionFromToken({payload: {userId, sessionId, role: constants.userRoles.serviceProvider}})
 
+const generatePasswordResetOTP      = async phoneNumber => {
+    const OTP                       = process.env.NODE_ENV === 'prod' ? randomNumber() : 111111;
+    await redis.set(redisKeys.spPhoneVerification(phoneNumber), OTP, 'EX', 5 * 60) // valid for 5 min
+    return OTP
+}
+
+const verifyPasswordResetOTP        = async (phoneNumber, OTP) => {
+    const correctOTP                = await redis.get(redisKeys.spPhoneVerification(phoneNumber))
+    if(!correctOTP)
+        throw errify.badRequest(errMsg['1019'], 1019)
+    if(Number(correctOTP) !== OTP)
+        throw errify.badRequest(errMsg['1016'], 1016)
+    await redis.del(redisKeys.spPhoneVerification(phoneNumber))
+}
+
+const resetPassword                 = async (phoneNumber, password) => {
+    password                        = await bcrypt.hashPassword(password)
+    return ServiceProvider.updateOne({phoneNumber}, {$set: {password}})
+}
+
 const updateSPLastActivity          = _id => {
     try {
         return mongo.updateOne(ServiceProvider, {_id}, {$set: {lastActivityAt: new Date()}})
@@ -260,6 +280,9 @@ module.exports = {
     comparePassword,
     createSession,
     expireSession,
+    generatePasswordResetOTP,
+    verifyPasswordResetOTP,
+    resetPassword,
     updateSPLastActivity,
 
     // Permissions and Valadities

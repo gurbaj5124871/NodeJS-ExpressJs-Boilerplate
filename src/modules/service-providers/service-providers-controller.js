@@ -74,6 +74,31 @@ const logout                        = async (req, res, next) => {
     }
 }
 
+const forgotPassword                = async (req, res, next) => {
+    try {
+        const {extention, phoneNumber} = req.body;
+        const serviceProvider       = await serviceProviderServices.getServiceProviderByEmailOrPhoneNumber(undefined, phoneNumber)
+        if(!serviceProvider)
+            throw errify.badRequest(errMsg['1017'], 1017)
+        const OTP                   = await serviceProviderServices.generatePasswordResetOTP(phoneNumber)
+        // send otp to service provider
+        return res.send({success: true})
+    } catch (err) {
+        next(err)
+    }
+}
+
+const resetPassword                 = async (req, res, next) => {
+    try {
+        const {phoneNumber, OTP, password} = req.body;
+        await serviceProviderServices.verifyPasswordResetOTP(phoneNumber, OTP)
+        await serviceProviderServices.resetPassword(phoneNumber, password)
+        return login(req, res, next)
+    } catch (err) {
+        next(err)
+    }
+}
+
 const getAllServiceProviders        = async (req, res, next) => {
     try {
         const query                 = req.query, {limit, lastServiceProviderId} = query;
@@ -190,6 +215,8 @@ module.exports                      = {
     signup,
     login,
     logout,
+    forgotPassword,
+    resetPassword,
     getAllServiceProviders,
     getServiceProviderById,
     getServiceProviderByHandle,

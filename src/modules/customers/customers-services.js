@@ -31,6 +31,7 @@ const phoneVerificationCheck    = async (phoneNumber, OTP) => {
     const match                 = await redis.get(redisKeys.customerPhoneVerification(phoneNumber))
     if(!match || match !== OTP)
         return false
+    await redis.del(redisKeys.customerPhoneVerification(phoneNumber))
     return true
 }
 

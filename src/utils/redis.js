@@ -19,6 +19,9 @@ const redisKeys             = Object.freeze({
     // key value which should have expiration
     customerPhoneVerification: phoneNumber => `customerPhoneVerification:${phoneNumber}`,
 
+    // key value which should have expiration
+    spPhoneVerification     : phoneNumber => `spPhoneVerification:${phoneNumber}`,
+
     // user basic details, expire it after one month or update on user update
     user                    : userId => `user:${userId}`
     
