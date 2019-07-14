@@ -20,8 +20,6 @@ app.set('view engine', 'ejs');
 app.use(helmet());
 app.use(morgan(config.get('/morgan'), {skip: (req, res) => res.statusCode < 400, stream: process.stderr}));
 app.use(morgan(config.get('/morgan'), {skip: (req, res) => res.statusCode >= 400, stream: process.stdout}));
-if(process.env.NODE_ENV !== 'prod')
-app.use(express.static(path.join(__dirname, './swagger/dist')))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -58,7 +56,6 @@ app.use(errify.errorhandlerMiddleware);
 (async () => {
     await require('./bootstrap/mongo')()
     await require('./bootstrap/redis')
-    await require('./src/ms-inter-comm')
 })();
 
 process.on('uncaughtException', err => {

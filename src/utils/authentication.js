@@ -72,7 +72,7 @@ const generateToken         = async (userId, sessionId, role, roles, platform) =
     const expiry            = config.get(`/jwt/expireAfter/${role}/${platform}`) || '1d';
     return jwt.signAsync({
         userId: userId.toString(), sessionId: sessionId.toString(),
-        role, roles, issuer: 'dhandahub.com'}, secret, {expiresIn: expiry
+        role, roles, issuer: 'base.com'}, secret, {expiresIn: expiry
     })
 }
 

@@ -7,7 +7,7 @@ const criteria          = {
 }
 
 const config            = {
-    microServiceName    : 'ironman',
+    microServiceName    : 'user',
     
     port                : {
         $filter         : 'env',
@@ -53,10 +53,10 @@ const config            = {
 
     mongodb             : {
         $filter         : 'env',
-        dev             : `mongodb://localhost:27017/dhandahub`,
-        test            : `mongodb://localhost/dhandahub`,
-        prod            : `mongodb://localhost/dhandahub`,
-        $default        : 'mongodb://127.0.0.1:27017/dhandahub'
+        dev             : `mongodb://localhost:27017/base`,
+        test            : `mongodb://localhost/base`,
+        prod            : `mongodb://localhost/base`,
+        $default        : 'mongodb://127.0.0.1:27017/base'
     },
 
     redis: {
@@ -73,19 +73,6 @@ const config            = {
         test            : ':method :url :status :response-time ms - :req[x-real-ip] [:date[iso]]',
         prod            : ':method :url HTTP/:http-version :status :req[x-real-ip] [:date[iso]] \":remote-addr - :remote-user\" \":referrer\" \":user-agent\" - :response-time ms',
         $default        : 'dev'
-    },
-
-    mqttBroker          : {
-        url             : {
-            $filter     : 'env',
-            dev         : 'ws://localhost:8883',
-            test        : 'ws://localhost:8883',
-            prod        : 'ws://localhost:8883',
-            $default    : 'ws://localhost:8883',
-        },
-        clientId        : 'ironman',
-        username        : 'ironman',
-        password        : 'password'
     }
 }
 

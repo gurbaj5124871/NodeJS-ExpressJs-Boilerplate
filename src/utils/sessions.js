@@ -8,8 +8,6 @@ function getSessionKey(userId, role){
     const sessionkey                = (role => {
         const roles                 = constants.userRoles
         switch(role)                {
-            case roles.customer     : return redisKeys.customerSession(userId)
-            case roles.serviceProvider: return redisKeys.serviceProviderSession(userId)
             case roles.admin        : return redisKeys.adminSession(userId)
         }
     })(role);

@@ -1,7 +1,7 @@
 {
   "name": "ironman",
   "version": "1.0.0",
-  "description": "User MS for dhandaHub",
+  "description": "User MS for base",
   "main": "node ./bin/www",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
